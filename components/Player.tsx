@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import type { Podcast } from '../types';
 import { getPodcastFromDB } from '../lib/db';
+import { formatTime } from '../lib/utils';
 import PlayIcon from './icons/PlayIcon';
 import PauseIcon from './icons/PauseIcon';
 import ChevronDownIcon from './icons/ChevronDownIcon';
@@ -16,13 +17,6 @@ interface PlayerProps {
   isPlayerExpanded: boolean;
   setIsPlayerExpanded: (isExpanded: boolean) => void;
 }
-
-const formatTime = (time: number) => {
-  if (isNaN(time)) return '0:00';
-  const minutes = Math.floor(time / 60);
-  const seconds = Math.floor(time % 60);
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-};
 
 const Player: React.FC<PlayerProps> = ({ 
   podcast, 
@@ -136,7 +130,7 @@ const Player: React.FC<PlayerProps> = ({
   );
 
   const sharedControls = (size: 'small' | 'large') => (
-    <div className={`flex items-center justify-center gap-${size === 'large' ? '8' : '2'}`}>
+    <div className={`flex items-center justify-center gap-${size === 'large' ? '4 sm:gap-8' : '2'}`}>
       <button onClick={() => handleSkip(-5)} className="text-brand-text-secondary hover:text-brand-text p-2 rounded-full text-sm">
           -5s
       </button>
@@ -176,23 +170,23 @@ const Player: React.FC<PlayerProps> = ({
       >
         {/* Expanded Player */}
         <div 
-          className={`absolute inset-0 bg-brand-bg flex flex-col p-8 transition-opacity duration-300 ease-in-out ${isPlayerExpanded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+          className={`absolute inset-0 bg-brand-bg flex flex-col p-4 sm:p-8 transition-opacity duration-300 ease-in-out ${isPlayerExpanded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         >
           <div className="flex-shrink-0">
             <button onClick={() => setIsPlayerExpanded(false)} className="text-brand-text-secondary hover:text-brand-text">
               <ChevronDownIcon size={32} />
             </button>
           </div>
-          <div className="flex-grow flex flex-col items-center justify-center text-center gap-8">
-            <div className="w-64 h-64 bg-brand-surface rounded-lg shadow-2xl overflow-hidden">
+          <div className="flex-grow flex flex-col items-center justify-center text-center gap-6 sm:gap-8">
+            <div className="w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-brand-surface rounded-lg shadow-2xl overflow-hidden">
               <img
                 src="https://www.visithasselt.be/sites/visithasselt/files/styles/teaser_cover/public/2025-02/iedereen-verdient-vakantie.jpg.jpg?h=38395a2e&itok=iRMrimgV"
                 alt={`Artwork for ${podcast.name}`}
                 className="w-full h-full object-cover"
               />
             </div>
-            <h2 className="text-2xl font-bold text-brand-text">{podcast.name}</h2>
-            <div className="w-full max-w-md">
+            <h2 className="text-xl sm:text-2xl font-bold text-brand-text">{podcast.name}</h2>
+            <div className="w-full max-w-md px-4 sm:px-0">
               {sharedProgressBar}
             </div>
              {sharedControls('large')}
@@ -210,9 +204,9 @@ const Player: React.FC<PlayerProps> = ({
                 {isPlaying ? <PauseIcon /> : <PlayIcon />}
               </button>
             </div>
-            <div className="flex-grow">
+            <div className="flex-grow min-w-0">
               <p className="font-bold text-brand-text truncate">{podcast.name}</p>
-              <div className="w-full bg-gray-600 rounded-full h-1">
+              <div className="w-full bg-gray-600 rounded-full h-1 mt-1">
                 <div className="bg-brand-primary h-1 rounded-full" style={{ width: `${progressPercent}%` }}></div>
               </div>
             </div>

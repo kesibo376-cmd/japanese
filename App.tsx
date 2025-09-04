@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import type { Podcast } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { savePodcastToDB, clearPodcastsInDB } from './lib/db';
@@ -7,6 +7,7 @@ import PodcastList from './components/PodcastList';
 import Player from './components/Player';
 import StatusBar from './components/StatusBar';
 import SettingsIcon from './components/icons/SettingsIcon';
+import EditIcon from './components/icons/EditIcon';
 import SettingsModal from './components/SettingsModal';
 
 const INITIAL_PODCASTS: Podcast[] = [];
@@ -21,11 +22,14 @@ const PRELOADED_PODCAST_URLS = [
 
 export default function App() {
   const [podcasts, setPodcasts] = useLocalStorage<Podcast[]>('podcasts', INITIAL_PODCASTS);
+  const [title, setTitle] = useLocalStorage<string>('appTitle', '日本語コース');
   const [currentPodcastId, setCurrentPodcastId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isPlayerExpanded, setIsPlayerExpanded] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   // Effect to load pre-defined podcasts from the public folder on initial app load
   useEffect(() => {
@@ -92,6 +96,14 @@ export default function App() {
       document.body.classList.remove('overflow-hidden');
     };
   }, [isPlayerExpanded]);
+
+  // Effect to focus the title input when editing starts
+  useEffect(() => {
+    if (isEditingTitle) {
+      titleInputRef.current?.focus();
+      titleInputRef.current?.select();
+    }
+  }, [isEditingTitle]);
 
   const handleFileUpload = useCallback((files: FileList) => {
     setIsLoading(true);
@@ -242,9 +254,39 @@ export default function App() {
       <div className={`transition-opacity duration-300 ${isPlayerExpanded ? 'opacity-0 invisible' : 'opacity-100 visible'}`}>
         <header className="p-4 sm:p-6 md:p-8">
           <div className="max-w-4xl mx-auto">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl sm:text-3xl font-bold">私のポッドキャスト</h1>
-              <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+              <div className="flex-1 min-w-0">
+                {isEditingTitle ? (
+                  <input
+                    ref={titleInputRef}
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    onBlur={() => setIsEditingTitle(false)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === 'Escape') {
+                        setIsEditingTitle(false);
+                        (e.target as HTMLInputElement).blur();
+                      }
+                    }}
+                    className="text-2xl sm:text-3xl font-bold bg-transparent text-brand-text focus:outline-none w-full border-b-2 border-brand-surface-light focus:border-brand-primary transition-colors"
+                    aria-label="Edit course title"
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 group">
+                    <h1 className="text-2xl sm:text-3xl font-bold truncate">{title}</h1>
+                    <button
+                      onClick={() => setIsEditingTitle(true)}
+                      className="text-brand-text-secondary hover:text-brand-text p-1 rounded-full transition-opacity duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100"
+                      aria-label="Edit title"
+                    >
+                      <EditIcon size={20} />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 sm:gap-4 self-end sm:self-auto">
                 <FileUpload onFileUpload={handleFileUpload} isLoading={isLoading} />
                  <button
                     onClick={() => setIsSettingsOpen(true)}

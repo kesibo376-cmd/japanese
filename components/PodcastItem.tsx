@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Podcast } from '../types';
+import { formatTime } from '../lib/utils';
 import PlayIcon from './icons/PlayIcon';
 import PauseIcon from './icons/PauseIcon';
 import CheckIcon from './icons/CheckIcon';
@@ -39,6 +40,9 @@ const PodcastItem: React.FC<PodcastItemProps> = ({ podcast, isActive, isPlaying,
             style={{ width: `${progressPercent}%` }}
           ></div>
         </div>
+      </div>
+      <div className="flex-shrink-0 text-sm text-brand-text-secondary w-12 text-right">
+        {formatTime(podcast.duration)}
       </div>
     </div>
   );
