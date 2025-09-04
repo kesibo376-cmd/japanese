@@ -54,14 +54,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-75 z-40 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black bg-opacity-75 z-40 overflow-y-auto p-4"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="settings-title"
     >
       <div 
-        className="bg-brand-surface rounded-lg shadow-2xl p-6 w-full max-w-sm b-border b-shadow"
+        className="bg-brand-surface rounded-lg shadow-2xl p-6 w-full max-w-sm b-border b-shadow mx-auto my-8"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">

@@ -89,9 +89,10 @@ export default function App() {
     }
   }, [setPodcasts, podcasts]);
 
-  // Effect to lock body scroll when player is expanded
+  // Effect to lock body scroll when player is expanded or settings are open
   useEffect(() => {
-    if (isPlayerExpanded) {
+    const shouldLockScroll = isPlayerExpanded || isSettingsOpen;
+    if (shouldLockScroll) {
       document.body.classList.add('overflow-hidden');
     } else {
       document.body.classList.remove('overflow-hidden');
@@ -101,7 +102,7 @@ export default function App() {
     return () => {
       document.body.classList.remove('overflow-hidden');
     };
-  }, [isPlayerExpanded]);
+  }, [isPlayerExpanded, isSettingsOpen]);
 
   // Effect to focus the title input when editing starts
   useEffect(() => {
