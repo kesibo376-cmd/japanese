@@ -1,0 +1,5 @@
+{
+  "name": "Local Podcast Player",
+  "description": "An application to upload your own podcasts or audio files and keep track of your listening progress. The interface is inspired by the clean, minimalist design of language learning apps.",
+  "requestFramePermissions": []
+}
