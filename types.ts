@@ -7,3 +7,12 @@ export interface Podcast {
   isListened: boolean;
   storage: 'preloaded' | 'indexeddb';
 }
+
+export type Theme = 'charcoal' | 'ocean' | 'paper';
+
+export interface StreakData {
+  enabled: boolean;
+  lastListenDate: string | null; // ISO Date String: YYYY-MM-DD
+  currentStreak: number;
+  history: string[]; // Array of ISO Date Strings
+}

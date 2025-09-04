@@ -1,13 +1,34 @@
 import React from 'react';
+import type { Theme, StreakData } from '../types';
+import ToggleSwitch from './ToggleSwitch';
 
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onResetProgress: () => void;
   onDeleteAll: () => void;
+  currentTheme: Theme;
+  onSetTheme: (theme: Theme) => void;
+  streakData: StreakData;
+  onSetStreakData: React.Dispatch<React.SetStateAction<StreakData>>;
 }
 
-const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onResetProgress, onDeleteAll }) => {
+const THEMES: { id: Theme; name: string }[] = [
+  { id: 'charcoal', name: 'Charcoal' },
+  { id: 'ocean', name: 'Ocean' },
+  { id: 'paper', name: 'Paper' },
+];
+
+const SettingsModal: React.FC<SettingsModalProps> = ({
+  isOpen,
+  onClose,
+  onResetProgress,
+  onDeleteAll,
+  currentTheme,
+  onSetTheme,
+  streakData,
+  onSetStreakData,
+}) => {
   if (!isOpen) return null;
 
   const handleResetClick = () => {
@@ -21,6 +42,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onResetP
       onClose();
     }
   };
+  
+  const handleStreakToggle = () => {
+      onSetStreakData(prev => ({ ...prev, enabled: !prev.enabled }));
+  }
 
   return (
     <div 
@@ -39,22 +64,59 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onResetP
           <button onClick={onClose} aria-label="Close settings" className="text-brand-text-secondary hover:text-brand-text text-3xl leading-none">&times;</button>
         </div>
         
-        <div className="space-y-4">
-          <button 
-            onClick={handleResetClick}
-            className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200"
-          >
-            <p className="font-semibold">Reset Progress</p>
-            <p className="text-sm text-brand-text-secondary">Mark all podcasts as unplayed and reset progress.</p>
-          </button>
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold text-brand-text mb-3">Appearance</h3>
+            <div className="space-y-2">
+              {THEMES.map(theme => (
+                <button
+                  key={theme.id}
+                  onClick={() => onSetTheme(theme.id)}
+                  className={`w-full text-left p-3 rounded-md transition-colors duration-200 flex items-center justify-between ${
+                    currentTheme === theme.id ? 'bg-brand-primary text-white' : 'bg-brand-surface-light hover:bg-opacity-75'
+                  }`}
+                >
+                  <span>{theme.name}</span>
+                  {currentTheme === theme.id && <span className="text-sm">Selected</span>}
+                </button>
+              ))}
+            </div>
+          </div>
           
-          <button 
-            onClick={handleDeleteClick}
-            className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200 text-red-500"
-          >
-            <p className="font-semibold">Delete All Podcasts</p>
-            <p className="text-sm">Permanently remove all audio files and data.</p>
-          </button>
+          <div>
+            <h3 className="text-lg font-semibold text-brand-text mb-3">Features</h3>
+             <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md">
+                <div>
+                    <p className="font-semibold">Enable Streak</p>
+                    <p className="text-sm text-brand-text-secondary">Track your daily listening activity.</p>
+                </div>
+                <ToggleSwitch
+                    isOn={streakData.enabled}
+                    handleToggle={handleStreakToggle}
+                />
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold text-brand-text mb-3">Data Management</h3>
+            <div className="space-y-2">
+              <button 
+                onClick={handleResetClick}
+                className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200"
+              >
+                <p className="font-semibold">Reset Progress</p>
+                <p className="text-sm text-brand-text-secondary">Mark all podcasts as unplayed and reset progress.</p>
+              </button>
+              
+              <button 
+                onClick={handleDeleteClick}
+                className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200 text-red-500"
+              >
+                <p className="font-semibold">Delete All Podcasts</p>
+                <p className="text-sm">Permanently remove all audio files and data.</p>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

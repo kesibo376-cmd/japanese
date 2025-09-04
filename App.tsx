@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import type { Podcast } from './types';
+import type { Podcast, StreakData, Theme } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { useTheme } from './hooks/useTheme';
+import { useStreak } from './hooks/useStreak';
 import { savePodcastToDB, clearPodcastsInDB } from './lib/db';
 import FileUpload from './components/FileUpload';
 import PodcastList from './components/PodcastList';
@@ -9,6 +11,7 @@ import StatusBar from './components/StatusBar';
 import SettingsIcon from './components/icons/SettingsIcon';
 import EditIcon from './components/icons/EditIcon';
 import SettingsModal from './components/SettingsModal';
+import StreakTracker from './components/StreakTracker';
 
 const INITIAL_PODCASTS: Podcast[] = [];
 
@@ -23,6 +26,8 @@ const PRELOADED_PODCAST_URLS = [
 export default function App() {
   const [podcasts, setPodcasts] = useLocalStorage<Podcast[]>('podcasts', INITIAL_PODCASTS);
   const [title, setTitle] = useLocalStorage<string>('appTitle', '日本語コース');
+  const [theme, setTheme] = useTheme();
+  const { streakData, setStreakData, recordActivity } = useStreak();
   const [currentPodcastId, setCurrentPodcastId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -158,6 +163,9 @@ export default function App() {
   }, [setPodcasts]);
 
   const updatePodcastProgress = useCallback((id: string, progress: number) => {
+    if (streakData.enabled) {
+      recordActivity();
+    }
     setPodcasts(prev => 
       prev.map(p => {
         if (p.id === id) {
@@ -168,7 +176,7 @@ export default function App() {
         return p;
       })
     );
-  }, [setPodcasts]);
+  }, [setPodcasts, recordActivity, streakData.enabled]);
 
   const updatePodcastDuration = useCallback((id: string, duration: number) => {
     setPodcasts(prev =>
@@ -273,15 +281,18 @@ export default function App() {
                     aria-label="Edit course title"
                   />
                 ) : (
-                  <div className="flex items-center gap-2 group">
-                    <h1 className="text-2xl sm:text-3xl font-bold truncate">{title}</h1>
-                    <button
-                      onClick={() => setIsEditingTitle(true)}
-                      className="text-brand-text-secondary hover:text-brand-text p-1 rounded-full transition-opacity duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100"
-                      aria-label="Edit title"
-                    >
-                      <EditIcon size={20} />
-                    </button>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 group">
+                      <h1 className="text-2xl sm:text-3xl font-bold truncate">{title}</h1>
+                      <button
+                        onClick={() => setIsEditingTitle(true)}
+                        className="text-brand-text-secondary hover:text-brand-text p-1 rounded-full transition-opacity duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100"
+                        aria-label="Edit title"
+                      >
+                        <EditIcon size={20} />
+                      </button>
+                    </div>
+                    {streakData.enabled && <StreakTracker streakData={streakData} />}
                   </div>
                 )}
               </div>
@@ -345,6 +356,10 @@ export default function App() {
         onClose={() => setIsSettingsOpen(false)}
         onResetProgress={handleResetProgress}
         onDeleteAll={handleDeleteAll}
+        currentTheme={theme}
+        onSetTheme={setTheme}
+        streakData={streakData}
+        onSetStreakData={setStreakData}
       />
     </div>
   );
