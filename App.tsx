@@ -14,7 +14,6 @@ const INITIAL_PODCASTS: Podcast[] = [];
 // Ensure the file names here exactly match the ones in your folder.
 const PRELOADED_PODCAST_URLS = [
   // Example: '/audio/my-cool-podcast.mp3',
-  '/audio/1.mp3',
 ];
 
 
