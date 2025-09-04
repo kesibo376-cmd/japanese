@@ -281,18 +281,15 @@ export default function App() {
                     aria-label="Edit course title"
                   />
                 ) : (
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 group">
-                      <h1 className="text-2xl sm:text-3xl font-bold truncate">{title}</h1>
-                      <button
-                        onClick={() => setIsEditingTitle(true)}
-                        className="text-brand-text-secondary hover:text-brand-text p-1 rounded-full transition-opacity duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100"
-                        aria-label="Edit title"
-                      >
-                        <EditIcon size={20} />
-                      </button>
-                    </div>
-                    {streakData.enabled && <StreakTracker streakData={streakData} />}
+                  <div className="flex items-center gap-2 group">
+                    <h1 className="text-2xl sm:text-3xl font-bold truncate">{title}</h1>
+                    <button
+                      onClick={() => setIsEditingTitle(true)}
+                      className="text-brand-text-secondary hover:text-brand-text p-1 rounded-full transition-opacity duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100"
+                      aria-label="Edit title"
+                    >
+                      <EditIcon size={20} />
+                    </button>
                   </div>
                 )}
               </div>
@@ -320,6 +317,11 @@ export default function App() {
 
         <main className="p-4 sm:p-6 md:p-8 pt-0">
           <div className="max-w-4xl mx-auto">
+            {streakData.enabled && podcasts.length > 0 && (
+              <div className="mb-6">
+                <StreakTracker streakData={streakData} />
+              </div>
+            )}
             {podcasts.length > 0 ? (
               <PodcastList 
                 podcasts={sortedPodcasts}
