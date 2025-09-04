@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -6,19 +5,95 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Local Podcast Player</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root, [data-theme="charcoal"] {
+        --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        --brand-bg: #121212;
+        --brand-surface: #1e1e1e;
+        --brand-surface-light: #282828;
+        --brand-primary: #1DB954;
+        --brand-primary-hover: #1ED760;
+        --brand-text: #FFFFFF;
+        --brand-text-secondary: #B3B3B3;
+        --brand-border-color: #282828;
+      }
+      [data-theme="ocean"] {
+        --font-sans: "Source Sans Pro", sans-serif;
+        --brand-bg: #0F1C2E;
+        --brand-surface: #1B293D;
+        --brand-surface-light: #273850;
+        --brand-primary: #38A3A5;
+        --brand-primary-hover: #57C4C6;
+        --brand-text: #E0FBFC;
+        --brand-text-secondary: #97C4D3;
+        --brand-border-color: #273850;
+      }
+      [data-theme="paper"] {
+        --font-sans: "Lora", serif;
+        --brand-bg: #F8F5F2;
+        --brand-surface: #EFEBE5;
+        --brand-surface-light: #E8E2DA;
+        --brand-primary: #D95550;
+        --brand-primary-hover: #E57373;
+        --brand-text: #3D405B;
+        --brand-text-secondary: #818AA3;
+        --brand-border-color: #3D405B;
+      }
+      [data-theme="brutalist"] {
+        --font-sans: 'Courier New', monospace;
+        --brand-bg: #F5F5DC; /* Beige */
+        --brand-surface: #F5F5DC;
+        --brand-surface-light: #E0E0C8; /* Slightly darker beige */
+        --brand-primary: #0000FF; /* Bright Blue */
+        --brand-primary-hover: #0000CC;
+        --brand-text: #000000;
+        --brand-text-secondary: #555555;
+        --brand-border-color: #000000;
+      }
+
+      /* Brutalist Overrides */
+      [data-theme="brutalist"] .rounded-lg,
+      [data-theme="brutalist"] .rounded-md,
+      [data-theme="brutalist"] .rounded-full {
+        border-radius: 0 !important;
+      }
+
+      [data-theme="brutalist"] .b-border {
+        border: 2px solid var(--brand-border-color);
+      }
+
+      [data-theme="brutalist"] .b-shadow {
+        box-shadow: 4px 4px 0px var(--brand-border-color);
+      }
+
+      [data-theme="brutalist"] .b-shadow-hover:hover {
+        box-shadow: 6px 6px 0px var(--brand-border-color);
+        transform: translate(-2px, -2px);
+      }
+      [data-theme="brutalist"] button.b-shadow-hover:active {
+        box-shadow: 2px 2px 0px var(--brand-border-color);
+        transform: translate(2px, 2px);
+      }
+    </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            'brand-bg': '#121212',
-            'brand-surface': '#1e1e1e',
-            'brand-surface-light': '#282828',
-            'brand-primary': '#1DB954',
-            'brand-primary-hover': '#1ED760',
-            'brand-text': '#FFFFFF',
-            'brand-text-secondary': '#B3B3B3',
+            'brand-bg': 'var(--brand-bg)',
+            'brand-surface': 'var(--brand-surface)',
+            'brand-surface-light': 'var(--brand-surface-light)',
+            'brand-primary': 'var(--brand-primary)',
+            'brand-primary-hover': 'var(--brand-primary-hover)',
+            'brand-text': 'var(--brand-text)',
+            'brand-text-secondary': 'var(--brand-text-secondary)',
+          },
+          fontFamily: {
+            sans: ['var(--font-sans)', 'sans-serif'],
           }
         }
       }
@@ -33,9 +108,8 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-brand-bg">
+  <body class="bg-brand-bg font-sans">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

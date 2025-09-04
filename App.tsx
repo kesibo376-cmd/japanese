@@ -336,7 +336,7 @@ export default function App() {
                 onSelectPodcast={handleSelectPodcast}
               />
             ) : (
-              <div className="text-center py-20 bg-brand-surface rounded-lg">
+              <div className="text-center py-20 bg-brand-surface rounded-lg b-border">
                 <h2 className="text-xl font-semibold">No Podcasts Yet</h2>
                 <p className="text-brand-text-secondary mt-2">Click "Add Podcast" to get started.</p>
               </div>

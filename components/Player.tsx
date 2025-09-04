@@ -171,10 +171,10 @@ const Player: React.FC<PlayerProps> = ({
   const sharedProgressBar = (
     <div className="w-full">
       <div 
-        className="w-full bg-brand-surface rounded-full h-1.5 cursor-pointer group"
+        className="w-full bg-brand-surface rounded-full h-1.5 cursor-pointer group b-border"
         onClick={handleSeek}
       >
-        <div className="bg-brand-primary h-1.5 rounded-full group-hover:bg-brand-primary-hover" style={{ width: `${progressPercent}%` }}></div>
+        <div className="bg-brand-primary h-full" style={{ width: `${progressPercent}%` }}></div>
       </div>
       <div className="flex justify-between text-xs text-brand-text-secondary mt-1">
         <span>{formatTime(currentTime)}</span>
@@ -190,7 +190,7 @@ const Player: React.FC<PlayerProps> = ({
       </button>
       <button
         onClick={() => setIsPlaying(!isPlaying)}
-        className={`bg-brand-primary text-brand-bg rounded-full hover:bg-brand-primary-hover transition-transform transform hover:scale-105 ${size === 'large' ? 'p-5' : 'p-3'}`}
+        className={`bg-brand-primary text-brand-bg rounded-full hover:bg-brand-primary-hover transition-transform transform hover:scale-105 ${size === 'large' ? 'p-5' : 'p-3'} b-border b-shadow b-shadow-hover`}
       >
       {isPlaying ? <PauseIcon size={size === 'large' ? 32 : 16} /> : <PlayIcon size={size === 'large' ? 32 : 16} />}
       </button>
@@ -237,7 +237,7 @@ const Player: React.FC<PlayerProps> = ({
             </button>
           </div>
           <div className="flex-grow flex flex-col items-center justify-center text-center gap-6 sm:gap-8">
-            <div className="w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-brand-surface rounded-lg shadow-2xl overflow-hidden">
+            <div className="w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-brand-surface rounded-lg shadow-2xl overflow-hidden b-border b-shadow">
               <img
                 src="https://www.visithasselt.be/sites/visithasselt/files/styles/teaser_cover/public/2025-02/iedereen-verdient-vakantie.jpg.jpg?h=38395a2e&itok=iRMrimgV"
                 alt={`Artwork for ${podcast.name}`}
@@ -254,25 +254,31 @@ const Player: React.FC<PlayerProps> = ({
 
         {/* Mini Player */}
         <div 
-          className={`absolute bottom-0 left-0 right-0 bg-brand-surface-light p-4 shadow-2xl border-t border-brand-surface transition-transform duration-500 ease-in-out cursor-pointer ${isPlayerExpanded ? 'translate-y-full' : 'translate-y-0'}`}
+          className={`absolute bottom-0 left-0 right-0 bg-brand-surface-light p-4 shadow-2xl border-t border-brand-surface transition-transform duration-500 ease-in-out cursor-pointer ${isPlayerExpanded ? 'translate-y-full' : 'translate-y-0'} b-border`}
           onClick={() => setIsPlayerExpanded(true)}
         >
           <div className="max-w-4xl mx-auto flex items-center gap-4">
-            <div className="flex-shrink-0">
-              <button onClick={(e) => { e.stopPropagation(); setIsPlaying(!isPlaying); }} className="text-brand-text">
-                {isPlaying ? <PauseIcon /> : <PlayIcon />}
-              </button>
-            </div>
             <div className="flex-grow min-w-0">
               <p className="font-bold text-brand-text truncate">{podcast.name}</p>
-              <div className="w-full bg-gray-600 rounded-full h-1 mt-1">
-                <div className="bg-brand-primary h-1 rounded-full" style={{ width: `${progressPercent}%` }}></div>
+              <div className="w-full bg-brand-surface rounded-full h-1 mt-1 b-border">
+                <div className="bg-brand-primary h-full" style={{ width: `${progressPercent}%` }}></div>
               </div>
             </div>
-             <div className="flex-shrink-0" onClick={(e) => {e.stopPropagation(); setIsPlayerExpanded(true)}}>
-                <button className="text-brand-text-secondary hover:text-brand-text p-2">
-                    <ChevronUpIcon size={24} />
-                </button>
+            <div className="flex-shrink-0 flex items-center gap-2">
+               <button 
+                onClick={(e) => { e.stopPropagation(); setIsPlaying(!isPlaying); }} 
+                className="text-brand-text p-2 rounded-full hover:bg-brand-surface b-border"
+                aria-label={isPlaying ? "Pause" : "Play"}
+              >
+                {isPlaying ? <PauseIcon size={24} /> : <PlayIcon size={24} />}
+              </button>
+              <button 
+                onClick={(e) => {e.stopPropagation(); setIsPlayerExpanded(true)}}
+                className="text-brand-text-secondary hover:text-brand-text p-2"
+                aria-label="Expand player"
+              >
+                  <ChevronUpIcon size={24} />
+              </button>
             </div>
           </div>
         </div>

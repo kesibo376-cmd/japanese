@@ -25,10 +25,10 @@ const StreakTracker: React.FC<StreakTrackerProps> = ({ streakData }) => {
   const historySet = new Set(history);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-8 bg-brand-surface text-brand-text rounded-lg p-4">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-8 bg-brand-surface text-brand-text rounded-lg p-4 b-border b-shadow">
       {/* Streak Count */}
       <div className="flex items-center gap-4 self-start sm:self-center">
-        <div className="flex-shrink-0 flex items-center justify-center bg-brand-surface-light rounded-full w-14 h-14">
+        <div className="flex-shrink-0 flex items-center justify-center bg-brand-surface-light rounded-full w-14 h-14 b-border">
             <FireIcon size={28} className="text-orange-400"/>
         </div>
         <div>
@@ -45,7 +45,7 @@ const StreakTracker: React.FC<StreakTrackerProps> = ({ streakData }) => {
             <div key={index} className="flex flex-col items-center gap-2 p-1 rounded-md text-center">
                <span className="text-xs sm:text-sm text-brand-text-secondary">{dayLabel}</span>
               <div
-                className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full transition-colors duration-200 ${isActive ? 'bg-brand-primary' : 'bg-brand-surface-light'}`}
+                className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full transition-colors duration-200 b-border ${isActive ? 'bg-brand-primary' : 'bg-brand-surface-light'}`}
                 title={`Activity on ${date}`}
               ></div>
             </div>

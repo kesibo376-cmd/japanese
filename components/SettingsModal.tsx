@@ -19,6 +19,7 @@ const THEMES: { id: Theme; name: string }[] = [
   { id: 'charcoal', name: 'Charcoal' },
   { id: 'ocean', name: 'Ocean' },
   { id: 'paper', name: 'Paper' },
+  { id: 'brutalist', name: 'Brutalist' },
 ];
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -60,7 +61,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       aria-labelledby="settings-title"
     >
       <div 
-        className="bg-brand-surface rounded-lg shadow-2xl p-6 w-full max-w-sm"
+        className="bg-brand-surface rounded-lg shadow-2xl p-6 w-full max-w-sm b-border b-shadow"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
@@ -76,7 +77,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 <button
                   key={theme.id}
                   onClick={() => onSetTheme(theme.id)}
-                  className={`w-full text-left p-3 rounded-md transition-colors duration-200 flex items-center justify-between ${
+                  className={`w-full text-left p-3 rounded-md transition-colors duration-200 flex items-center justify-between b-border ${
                     currentTheme === theme.id ? 'bg-brand-primary text-white' : 'bg-brand-surface-light hover:bg-opacity-75'
                   }`}
                 >
@@ -90,7 +91,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           <div>
             <h3 className="text-lg font-semibold text-brand-text mb-3">Features</h3>
             <div className="space-y-2">
-                <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md">
+                <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md b-border">
                     <div>
                         <p className="font-semibold">Enable Streak</p>
                         <p className="text-sm text-brand-text-secondary">Track your daily listening activity.</p>
@@ -100,7 +101,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         handleToggle={handleStreakToggle}
                     />
                 </div>
-                <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md">
+                <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md b-border">
                     <div>
                         <p className="font-semibold">Hide Completed</p>
                         <p className="text-sm text-brand-text-secondary">Remove listened items from the list.</p>
@@ -118,7 +119,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="space-y-2">
               <button 
                 onClick={handleResetClick}
-                className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200"
+                className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200 b-border"
               >
                 <p className="font-semibold">Reset Progress</p>
                 <p className="text-sm text-brand-text-secondary">Mark all podcasts as unplayed and reset progress.</p>
@@ -126,7 +127,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               
               <button 
                 onClick={handleDeleteClick}
-                className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200 text-red-500"
+                className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200 text-red-500 b-border"
               >
                 <p className="font-semibold">Delete All Podcasts</p>
                 <p className="text-sm">Permanently remove all audio files and data.</p>

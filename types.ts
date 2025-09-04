@@ -8,7 +8,7 @@ export interface Podcast {
   storage: 'preloaded' | 'indexeddb';
 }
 
-export type Theme = 'charcoal' | 'ocean' | 'paper';
+export type Theme = 'charcoal' | 'ocean' | 'paper' | 'brutalist';
 
 export interface StreakData {
   enabled: boolean;

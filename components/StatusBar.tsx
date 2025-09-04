@@ -14,7 +14,7 @@ const StatusBar: React.FC<StatusBarProps> = ({ listenedCount, totalCount, percen
         <span>{listenedCount} of {totalCount} listened</span>
       </div>
       <div 
-        className="w-full bg-brand-surface rounded-full h-2"
+        className="w-full bg-brand-surface rounded-full h-2 b-border"
         role="progressbar"
         aria-valuenow={percentage}
         aria-valuemin={0}
@@ -22,7 +22,7 @@ const StatusBar: React.FC<StatusBarProps> = ({ listenedCount, totalCount, percen
         aria-label="Podcast listening progress"
       >
         <div 
-          className="bg-brand-primary h-2 rounded-full transition-all duration-500 ease-out" 
+          className="bg-brand-primary h-full transition-all duration-500 ease-out" 
           style={{ width: `${percentage}%` }}
         ></div>
       </div>

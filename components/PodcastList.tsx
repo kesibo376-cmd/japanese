@@ -12,7 +12,7 @@ interface PodcastListProps {
 
 const PodcastList: React.FC<PodcastListProps> = ({ podcasts, currentPodcastId, isPlaying, onSelectPodcast }) => {
   return (
-    <div className="bg-brand-surface rounded-lg overflow-hidden shadow-lg">
+    <div className="bg-brand-surface rounded-lg overflow-hidden shadow-lg b-border b-shadow">
       {podcasts.map((podcast) => (
         <PodcastItem
           key={podcast.id}
