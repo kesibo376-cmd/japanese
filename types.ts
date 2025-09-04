@@ -10,9 +10,13 @@ export interface Podcast {
 
 export type Theme = 'charcoal' | 'ocean' | 'paper' | 'brutalist';
 
+export type StreakDifficulty = 'easy' | 'normal' | 'hard' | 'extreme';
+
 export interface StreakData {
   enabled: boolean;
   lastListenDate: string | null; // ISO Date String: YYYY-MM-DD
   currentStreak: number;
   history: string[]; // Array of ISO Date Strings
+  difficulty: StreakDifficulty;
+  completedToday: string[]; // Array of podcast IDs completed today
 }

@@ -3,15 +3,16 @@ import React from 'react';
 interface IconProps {
   size?: number;
   className?: string;
+  isFilled?: boolean;
 }
 
-const FireIcon: React.FC<IconProps> = ({ size = 24, className = '' }) => (
+const FireIcon: React.FC<IconProps> = ({ size = 24, className = '', isFilled = false }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}
     height={size}
     viewBox="0 0 24 24"
-    fill="none"
+    fill={isFilled ? "currentColor" : "none"}
     stroke="currentColor"
     strokeWidth="2"
     strokeLinecap="round"

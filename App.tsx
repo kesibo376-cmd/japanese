@@ -3,7 +3,7 @@ import type { Podcast, StreakData, Theme } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useTheme } from './hooks/useTheme';
 import { useStreak } from './hooks/useStreak';
-import { savePodcastToDB, clearPodcastsInDB } from './lib/db';
+import { savePodcastToDB, clearPodcastsInDB, deletePodcastFromDB } from './lib/db';
 import FileUpload from './components/FileUpload';
 import PodcastList from './components/PodcastList';
 import Player from './components/Player';
@@ -27,7 +27,7 @@ export default function App() {
   const [podcasts, setPodcasts] = useLocalStorage<Podcast[]>('podcasts', INITIAL_PODCASTS);
   const [title, setTitle] = useLocalStorage<string>('appTitle', '日本語コース');
   const [theme, setTheme] = useTheme();
-  const { streakData, setStreakData, recordActivity } = useStreak();
+  const { streakData, setStreakData, recordActivity, recordCompletion, unrecordCompletion, isTodayComplete } = useStreak();
   const [hideCompleted, setHideCompleted] = useLocalStorage<boolean>('hideCompleted', false);
   const [currentPodcastId, setCurrentPodcastId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -165,20 +165,29 @@ export default function App() {
   }, [setPodcasts]);
 
   const updatePodcastProgress = useCallback((id: string, progress: number) => {
-    if (streakData.enabled) {
+    if (streakData.enabled && streakData.difficulty === 'easy') {
       recordActivity();
     }
-    setPodcasts(prev => 
-      prev.map(p => {
+    setPodcasts(prev => {
+      let podcastWasCompleted = false;
+      const updatedPodcasts = prev.map(p => {
         if (p.id === id) {
           // If progress is within 1 second of the end, mark as listened
           const isFinished = p.duration > 0 && progress >= p.duration - 1;
+          if (isFinished && !p.isListened) {
+            podcastWasCompleted = true;
+          }
           return { ...p, progress, isListened: p.isListened || isFinished };
         }
         return p;
-      })
-    );
-  }, [setPodcasts, recordActivity, streakData.enabled]);
+      });
+
+      if (podcastWasCompleted && streakData.enabled && streakData.difficulty !== 'easy') {
+          recordCompletion(id);
+      }
+      return updatedPodcasts;
+    });
+  }, [setPodcasts, recordActivity, recordCompletion, streakData.enabled, streakData.difficulty]);
 
   const updatePodcastDuration = useCallback((id: string, duration: number) => {
     setPodcasts(prev =>
@@ -211,7 +220,8 @@ export default function App() {
     setPodcasts(prev => 
         prev.map(p => ({ ...p, progress: 0, isListened: false }))
     );
-  }, [setPodcasts]);
+    setStreakData(prev => ({...prev, completedToday: [] }));
+  }, [setPodcasts, setStreakData]);
 
   const handleDeleteAll = useCallback(async () => {
     try {
@@ -220,10 +230,51 @@ export default function App() {
         setCurrentPodcastId(null);
         setIsPlaying(false);
         setIsPlayerExpanded(false);
+        setStreakData(prev => ({...prev, completedToday: [] }));
     } catch (error) {
         console.error("Failed to delete all podcasts:", error);
     }
-  }, [setPodcasts]);
+  }, [setPodcasts, setStreakData]);
+
+  const handleDeletePodcast = useCallback(async (id: string) => {
+    const podcastToDelete = podcasts.find(p => p.id === id);
+    if (!podcastToDelete) return;
+
+    if (podcastToDelete.storage === 'indexeddb') {
+      try {
+        await deletePodcastFromDB(id);
+      } catch (error) {
+        console.error("Failed to delete podcast from DB:", error);
+      }
+    }
+    setPodcasts(prev => prev.filter(p => p.id !== id));
+    if (streakData.enabled && streakData.difficulty !== 'easy') {
+        unrecordCompletion(id);
+    }
+    if (currentPodcastId === id) {
+        setCurrentPodcastId(null);
+        setIsPlaying(false);
+    }
+  }, [podcasts, setPodcasts, unrecordCompletion, streakData.enabled, streakData.difficulty, currentPodcastId]);
+
+  const handleToggleComplete = useCallback((id: string) => {
+    let wasCompleted: boolean | undefined;
+    setPodcasts(prev => prev.map(p => {
+      if (p.id === id) {
+        wasCompleted = !p.isListened;
+        return { ...p, isListened: !p.isListened, progress: !p.isListened ? p.duration : p.progress };
+      }
+      return p;
+    }));
+    
+    if (streakData.enabled && streakData.difficulty !== 'easy') {
+        if (wasCompleted) {
+            recordCompletion(id);
+        } else {
+            unrecordCompletion(id);
+        }
+    }
+  }, [setPodcasts, recordCompletion, unrecordCompletion, streakData.enabled, streakData.difficulty]);
 
   const currentPodcast = useMemo(() => 
     podcasts.find(p => p.id === currentPodcastId),
@@ -326,7 +377,7 @@ export default function App() {
           <div className="max-w-4xl mx-auto">
             {streakData.enabled && podcasts.length > 0 && (
               <div className="mb-6">
-                <StreakTracker streakData={streakData} />
+                <StreakTracker streakData={streakData} isTodayComplete={isTodayComplete} />
               </div>
             )}
             {podcasts.length > 0 ? (
@@ -335,6 +386,8 @@ export default function App() {
                 currentPodcastId={currentPodcastId}
                 isPlaying={isPlaying}
                 onSelectPodcast={handleSelectPodcast}
+                onDeletePodcast={handleDeletePodcast}
+                onTogglePodcastComplete={handleToggleComplete}
               />
             ) : (
               <div className="text-center py-20 bg-brand-surface rounded-lg b-border">

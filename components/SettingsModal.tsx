@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Theme, StreakData } from '../types';
+import type { Theme, StreakData, StreakDifficulty } from '../types';
 import ToggleSwitch from './ToggleSwitch';
 
 interface SettingsModalProps {
@@ -21,6 +21,13 @@ const THEMES: { id: Theme; name: string }[] = [
   { id: 'paper', name: 'Paper' },
   { id: 'brutalist', name: 'Brutalist' },
 ];
+
+const DIFFICULTIES: { id: StreakDifficulty, name: string, description: string }[] = [
+    { id: 'easy', name: 'Easy', description: 'Listen to any podcast.' },
+    { id: 'normal', name: 'Normal', description: 'Complete 1 podcast.' },
+    { id: 'hard', name: 'Hard', description: 'Complete 2 podcasts.' },
+    { id: 'extreme', name: 'Extreme', description: 'Complete 3 podcasts.' },
+]
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
@@ -50,6 +57,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   
   const handleStreakToggle = () => {
       onSetStreakData(prev => ({ ...prev, enabled: !prev.enabled }));
+  }
+  
+  const handleDifficultyChange = (difficulty: StreakDifficulty) => {
+      onSetStreakData(prev => ({...prev, difficulty }));
   }
 
   return (
@@ -100,6 +111,26 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         isOn={streakData.enabled}
                         handleToggle={handleStreakToggle}
                     />
+                </div>
+                 <div className="p-3 bg-brand-surface-light rounded-md b-border">
+                    <p className="font-semibold mb-2">Streak Difficulty</p>
+                     <div className="flex flex-col space-y-2">
+                        {DIFFICULTIES.map(d => (
+                             <button
+                                key={d.id}
+                                onClick={() => handleDifficultyChange(d.id)}
+                                className={`w-full text-left p-2 rounded-md transition-colors duration-200 flex items-center justify-between text-sm b-border ${
+                                    streakData.difficulty === d.id ? 'bg-brand-primary text-white' : 'bg-brand-surface hover:bg-opacity-75'
+                                }`}
+                            >
+                                <div>
+                                    <span className="font-semibold">{d.name}</span>
+                                    <span className="text-xs ml-2 opacity-80">{d.description}</span>
+                                </div>
+                                {streakData.difficulty === d.id && <span className="text-xs">Selected</span>}
+                            </button>
+                        ))}
+                    </div>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md b-border">
                     <div>

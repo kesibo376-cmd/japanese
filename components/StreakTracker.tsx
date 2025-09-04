@@ -4,11 +4,12 @@ import FireIcon from './icons/FireIcon';
 
 interface StreakTrackerProps {
   streakData: StreakData;
+  isTodayComplete: boolean;
 }
 
 const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-const StreakTracker: React.FC<StreakTrackerProps> = ({ streakData }) => {
+const StreakTracker: React.FC<StreakTrackerProps> = ({ streakData, isTodayComplete }) => {
   const { currentStreak, history } = streakData;
 
   const today = new Date();
@@ -29,7 +30,7 @@ const StreakTracker: React.FC<StreakTrackerProps> = ({ streakData }) => {
       {/* Streak Count */}
       <div className="flex items-center gap-4 self-start sm:self-center">
         <div className="flex-shrink-0 flex items-center justify-center bg-brand-surface-light rounded-full w-14 h-14 b-border">
-            <FireIcon size={28} className="text-orange-400"/>
+            <FireIcon size={28} className="text-orange-400" isFilled={isTodayComplete}/>
         </div>
         <div>
             <span className="font-bold text-4xl leading-none">{currentStreak}</span>
