@@ -13,6 +13,8 @@ interface SettingsModalProps {
   onSetStreakData: React.Dispatch<React.SetStateAction<StreakData>>;
   hideCompleted: boolean;
   onSetHideCompleted: (value: boolean) => void;
+  reviewModeEnabled: boolean;
+  onSetReviewModeEnabled: (value: boolean) => void;
 }
 
 const THEMES: { id: Theme; name: string }[] = [
@@ -40,6 +42,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onSetStreakData,
   hideCompleted,
   onSetHideCompleted,
+  reviewModeEnabled,
+  onSetReviewModeEnabled,
 }) => {
   if (!isOpen) return null;
 
@@ -131,6 +135,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                             </button>
                         ))}
                     </div>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md b-border">
+                    <div>
+                        <p className="font-semibold">Review Mode</p>
+                        <p className="text-sm text-brand-text-secondary">Prompt to review previous lesson.</p>
+                    </div>
+                    <ToggleSwitch
+                        isOn={reviewModeEnabled}
+                        handleToggle={() => onSetReviewModeEnabled(!reviewModeEnabled)}
+                    />
                 </div>
                 <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md b-border">
                     <div>

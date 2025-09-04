@@ -12,6 +12,7 @@ import SettingsIcon from './components/icons/SettingsIcon';
 import EditIcon from './components/icons/EditIcon';
 import SettingsModal from './components/SettingsModal';
 import StreakTracker from './components/StreakTracker';
+import ReviewModal from './components/ReviewModal';
 
 const INITIAL_PODCASTS: Podcast[] = [];
 
@@ -36,6 +37,9 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const [reviewModeEnabled, setReviewModeEnabled] = useLocalStorage<boolean>('reviewModeEnabled', false);
+  const [reviewPrompt, setReviewPrompt] = useState<{ show: boolean; podcastToReview: Podcast | null; podcastToPlay: Podcast | null }>({ show: false, podcastToReview: null, podcastToPlay: null });
+  const [nextPodcastOnEnd, setNextPodcastOnEnd] = useState<string | null>(null);
 
   // Effect to load pre-defined podcasts from the public folder on initial app load
   useEffect(() => {
@@ -195,24 +199,105 @@ export default function App() {
     );
   }, [setPodcasts]);
   
+  const startPlayback = useCallback((id: string) => {
+    setCurrentPodcastId(id);
+    setIsPlaying(true);
+    if (!isPlayerExpanded) setIsPlayerExpanded(true);
+  }, [isPlayerExpanded]);
+
+  const visiblePodcasts = useMemo(() => {
+    const sorted = [...podcasts].sort((a, b) => {
+      const numA = parseInt(a.name, 10);
+      const numB = parseInt(b.name, 10);
+
+      // If both are not numbers, sort alphabetically
+      if (isNaN(numA) && isNaN(numB)) {
+        return a.name.localeCompare(b.name);
+      }
+      // If only A is not a number, push it to the end
+      if (isNaN(numA)) {
+        return 1;
+      }
+      // If only B is not a number, push it to the end
+      if (isNaN(numB)) {
+        return -1;
+      }
+      // Otherwise, sort numerically
+      return numA - numB;
+    });
+
+    if (hideCompleted) {
+        return sorted.filter(p => !p.isListened);
+    }
+    return sorted;
+  }, [podcasts, hideCompleted]);
+
   const handleSelectPodcast = (id: string) => {
     if (currentPodcastId === id) {
       setIsPlaying(prev => !prev);
-    } else {
-      setCurrentPodcastId(id);
-      setIsPlaying(true);
-      setIsPlayerExpanded(true); // Expand player on new selection
+      return;
     }
+
+    const podcastToPlay = podcasts.find(p => p.id === id);
+    if (!podcastToPlay) return;
+
+    if (!reviewModeEnabled) {
+      startPlayback(id);
+      return;
+    }
+
+    const currentIndex = visiblePodcasts.findIndex(p => p.id === id);
+    if (currentIndex <= 0) {
+      startPlayback(id);
+      return;
+    }
+
+    const podcastToReview = visiblePodcasts[currentIndex - 1];
+    if (!podcastToReview.isListened) {
+      startPlayback(id);
+      return;
+    }
+
+    // All conditions met, show prompt
+    setReviewPrompt({ show: true, podcastToReview, podcastToPlay });
   };
 
   const handlePlaybackEnd = () => {
-      setIsPlaying(false);
       if (currentPodcastId) {
         // The check in updatePodcastProgress is more reliable, but we can ensure it's marked here too.
         setPodcasts(prev => 
             prev.map(p => p.id === currentPodcastId ? { ...p, isListened: true } : p)
         );
       }
+
+      if (nextPodcastOnEnd) {
+        startPlayback(nextPodcastOnEnd);
+        setNextPodcastOnEnd(null);
+      } else {
+        setIsPlaying(false);
+      }
+  };
+
+  const handleConfirmReview = () => {
+    if (!reviewPrompt.podcastToReview || !reviewPrompt.podcastToPlay) return;
+    
+    const reviewId = reviewPrompt.podcastToReview.id;
+    const playId = reviewPrompt.podcastToPlay.id;
+
+    setNextPodcastOnEnd(playId);
+    setPodcasts(prev => prev.map(p => 
+        p.id === reviewId ? { ...p, progress: 0 } : p
+    ));
+    
+    startPlayback(reviewId);
+
+    setReviewPrompt({ show: false, podcastToReview: null, podcastToPlay: null });
+  };
+
+  const handleCancelReview = () => {
+    if (!reviewPrompt.podcastToPlay) return;
+    startPlayback(reviewPrompt.podcastToPlay.id);
+    setReviewPrompt({ show: false, podcastToReview: null, podcastToPlay: null });
   };
 
   const handleResetProgress = useCallback(() => {
@@ -287,33 +372,6 @@ export default function App() {
     const percentage = totalCount > 0 ? (listenedCount / totalCount) * 100 : 0;
     return { listenedCount, totalCount, percentage };
   }, [podcasts]);
-
-  const visiblePodcasts = useMemo(() => {
-    const sorted = [...podcasts].sort((a, b) => {
-      const numA = parseInt(a.name, 10);
-      const numB = parseInt(b.name, 10);
-
-      // If both are not numbers, sort alphabetically
-      if (isNaN(numA) && isNaN(numB)) {
-        return a.name.localeCompare(b.name);
-      }
-      // If only A is not a number, push it to the end
-      if (isNaN(numA)) {
-        return 1;
-      }
-      // If only B is not a number, push it to the end
-      if (isNaN(numB)) {
-        return -1;
-      }
-      // Otherwise, sort numerically
-      return numA - numB;
-    });
-
-    if (hideCompleted) {
-        return sorted.filter(p => !p.isListened);
-    }
-    return sorted;
-  }, [podcasts, hideCompleted]);
 
   return (
     <div className="text-brand-text min-h-screen">
@@ -424,6 +482,15 @@ export default function App() {
         onSetStreakData={setStreakData}
         hideCompleted={hideCompleted}
         onSetHideCompleted={setHideCompleted}
+        reviewModeEnabled={reviewModeEnabled}
+        onSetReviewModeEnabled={setReviewModeEnabled}
+      />
+      
+      <ReviewModal
+        isOpen={reviewPrompt.show}
+        onConfirm={handleConfirmReview}
+        onCancel={handleCancelReview}
+        podcastName={reviewPrompt.podcastToReview?.name || ''}
       />
     </div>
   );

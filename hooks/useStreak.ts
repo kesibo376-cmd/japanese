@@ -7,7 +7,7 @@ const INITIAL_STREAK_DATA: StreakData = {
   lastListenDate: null,
   currentStreak: 0,
   history: [],
-  difficulty: 'easy',
+  difficulty: 'normal',
   completedToday: [],
 };
 
