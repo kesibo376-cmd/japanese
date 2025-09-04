@@ -79,7 +79,7 @@ const PodcastItem: React.FC<PodcastItemProps> = ({ podcast, isActive, isPlaying,
             <ThreeDotsIcon size={20} />
           </button>
           {isMenuOpen && (
-              <div className="absolute right-4 top-12 mt-1 w-48 bg-brand-surface-light rounded-md shadow-lg z-30 b-border">
+              <div className="absolute right-4 top-12 mt-1 w-48 bg-brand-surface-light rounded-md shadow-lg z-50 b-border">
                   <ul className="py-1">
                       <li>
                           <button 

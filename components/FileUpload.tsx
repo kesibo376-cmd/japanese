@@ -38,7 +38,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, isLoading }) => {
       <button
         onClick={handleClick}
         disabled={isLoading}
-        className="flex items-center justify-center bg-brand-primary text-brand-text rounded-full hover:bg-brand-primary-hover transition-colors duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed p-2 sm:py-2 sm:px-4 b-border b-shadow b-shadow-hover"
+        className="flex items-center justify-center bg-brand-primary text-brand-text-on-primary rounded-full hover:bg-brand-primary-hover transition-colors duration-300 disabled:bg-gray-500 disabled:cursor-not-allowed p-2 sm:py-2 sm:px-4 b-border b-shadow b-shadow-hover"
       >
         {isLoading ? (
           <>

@@ -8,7 +8,7 @@ export interface Podcast {
   storage: 'preloaded' | 'indexeddb';
 }
 
-export type Theme = 'charcoal' | 'ocean' | 'paper' | 'brutalist';
+export type Theme = 'charcoal' | 'ocean' | 'paper' | 'brutalist' | 'cyber';
 
 export type StreakDifficulty = 'easy' | 'normal' | 'hard' | 'extreme';
 

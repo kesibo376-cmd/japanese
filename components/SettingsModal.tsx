@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import type { Theme, StreakData, StreakDifficulty } from '../types';
 import ToggleSwitch from './ToggleSwitch';
+import ImageIcon from './icons/ImageIcon';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -15,6 +16,8 @@ interface SettingsModalProps {
   onSetHideCompleted: (value: boolean) => void;
   reviewModeEnabled: boolean;
   onSetReviewModeEnabled: (value: boolean) => void;
+  customArtwork: string | null;
+  onSetCustomArtwork: (artwork: string | null) => void;
 }
 
 const THEMES: { id: Theme; name: string }[] = [
@@ -22,6 +25,7 @@ const THEMES: { id: Theme; name: string }[] = [
   { id: 'ocean', name: 'Ocean' },
   { id: 'paper', name: 'Paper' },
   { id: 'brutalist', name: 'Brutalist' },
+  { id: 'cyber', name: 'Cyber' },
 ];
 
 const DIFFICULTIES: { id: StreakDifficulty, name: string, description: string }[] = [
@@ -44,7 +48,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onSetHideCompleted,
   reviewModeEnabled,
   onSetReviewModeEnabled,
+  customArtwork,
+  onSetCustomArtwork,
 }) => {
+  const artworkInputRef = useRef<HTMLInputElement>(null);
+
   if (!isOpen) return null;
 
   const handleResetClick = () => {
@@ -66,6 +74,34 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const handleDifficultyChange = (difficulty: StreakDifficulty) => {
       onSetStreakData(prev => ({...prev, difficulty }));
   }
+
+  const handleArtworkUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        alert('Please select an image file (e.g., JPG, PNG, GIF).');
+        return;
+    }
+
+    if (file.size > 1024 * 1024) { // 1MB limit
+        alert('Please select an image smaller than 1MB.');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        if (e.target?.result) {
+            onSetCustomArtwork(e.target.result as string);
+        }
+    };
+    reader.readAsDataURL(file);
+
+    // Reset file input to allow uploading the same file again
+    if(event.target) {
+        event.target.value = '';
+    }
+  };
 
   return (
     <div 
@@ -103,6 +139,40 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </div>
           
+          <div>
+            <h3 className="text-lg font-semibold text-brand-text mb-3">Artwork</h3>
+            <input
+              type="file"
+              accept="image/*"
+              ref={artworkInputRef}
+              onChange={handleArtworkUpload}
+              className="hidden"
+              aria-label="Upload custom artwork"
+            />
+            <div className="p-3 bg-brand-surface-light rounded-md b-border flex items-center gap-4">
+              <div className="w-20 h-20 bg-brand-surface rounded-md b-border flex-shrink-0 flex items-center justify-center overflow-hidden">
+                {customArtwork ? (
+                  <img src={customArtwork} alt="Custom artwork" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="flex flex-col items-center text-brand-text-secondary">
+                    <ImageIcon size={24} />
+                    <span className="text-xs text-center mt-1">No Artwork</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col gap-2 flex-grow">
+                <button onClick={() => artworkInputRef.current?.click()} className="w-full text-sm text-center px-3 py-2 bg-brand-surface hover:bg-opacity-75 rounded-md transition-colors duration-200 b-border">
+                  {customArtwork ? 'Change Image' : 'Upload Image'}
+                </button>
+                {customArtwork && (
+                  <button onClick={() => onSetCustomArtwork(null)} className="w-full text-sm text-center text-red-500 hover:bg-red-500 hover:text-white px-3 py-2 bg-brand-surface rounded-md transition-colors duration-200 b-border">
+                    Remove
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
           <div>
             <h3 className="text-lg font-semibold text-brand-text mb-3">Features</h3>
             <div className="space-y-2">

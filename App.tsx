@@ -40,6 +40,7 @@ export default function App() {
   const [reviewModeEnabled, setReviewModeEnabled] = useLocalStorage<boolean>('reviewModeEnabled', false);
   const [reviewPrompt, setReviewPrompt] = useState<{ show: boolean; podcastToReview: Podcast | null; podcastToPlay: Podcast | null }>({ show: false, podcastToReview: null, podcastToPlay: null });
   const [nextPodcastOnEnd, setNextPodcastOnEnd] = useState<string | null>(null);
+  const [customArtwork, setCustomArtwork] = useLocalStorage<string | null>('customArtwork', null);
 
   // Effect to load pre-defined podcasts from the public folder on initial app load
   useEffect(() => {
@@ -475,6 +476,7 @@ export default function App() {
           onEnded={handlePlaybackEnd}
           isPlayerExpanded={isPlayerExpanded}
           setIsPlayerExpanded={setIsPlayerExpanded}
+          artworkUrl={customArtwork}
         />
       )}
 
@@ -491,6 +493,8 @@ export default function App() {
         onSetHideCompleted={setHideCompleted}
         reviewModeEnabled={reviewModeEnabled}
         onSetReviewModeEnabled={setReviewModeEnabled}
+        customArtwork={customArtwork}
+        onSetCustomArtwork={setCustomArtwork}
       />
       
       <ReviewModal

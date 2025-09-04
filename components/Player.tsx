@@ -16,6 +16,7 @@ interface PlayerProps {
   onEnded: () => void;
   isPlayerExpanded: boolean;
   setIsPlayerExpanded: (isExpanded: boolean) => void;
+  artworkUrl?: string | null;
 }
 
 const Player: React.FC<PlayerProps> = ({ 
@@ -26,7 +27,8 @@ const Player: React.FC<PlayerProps> = ({
   onDurationUpdate, 
   onEnded,
   isPlayerExpanded,
-  setIsPlayerExpanded
+  setIsPlayerExpanded,
+  artworkUrl
 }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [currentTime, setCurrentTime] = useState(podcast.progress);
@@ -174,7 +176,10 @@ const Player: React.FC<PlayerProps> = ({
         className="w-full bg-brand-surface rounded-full h-1.5 cursor-pointer group b-border"
         onClick={handleSeek}
       >
-        <div className="bg-brand-primary h-full" style={{ width: `${progressPercent}%` }}></div>
+        <div
+          className="bg-brand-primary h-full rounded-full transition-all duration-200 ease-linear"
+          style={{ width: `${progressPercent}%` }}
+        ></div>
       </div>
       <div className="flex justify-between text-xs text-brand-text-secondary mt-1">
         <span>{formatTime(currentTime)}</span>
@@ -190,7 +195,7 @@ const Player: React.FC<PlayerProps> = ({
       </button>
       <button
         onClick={() => setIsPlaying(!isPlaying)}
-        className={`bg-brand-primary text-brand-bg rounded-full hover:bg-brand-primary-hover transition-transform transform hover:scale-105 ${size === 'large' ? 'p-5' : 'p-3'} b-border b-shadow b-shadow-hover`}
+        className={`bg-brand-primary text-brand-text-on-primary rounded-full hover:bg-brand-primary-hover transition-transform transform hover:scale-105 ${size === 'large' ? 'p-5' : 'p-3'} b-border b-shadow b-shadow-hover`}
       >
       {isPlaying ? <PauseIcon size={size === 'large' ? 32 : 16} /> : <PlayIcon size={size === 'large' ? 32 : 16} />}
       </button>
@@ -239,7 +244,7 @@ const Player: React.FC<PlayerProps> = ({
           <div className="flex-grow flex flex-col items-center justify-center text-center gap-6 sm:gap-8">
             <div className="w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-brand-surface rounded-lg shadow-2xl overflow-hidden b-border b-shadow">
               <img
-                src="https://www.visithasselt.be/sites/visithasselt/files/styles/teaser_cover/public/2025-02/iedereen-verdient-vakantie.jpg.jpg?h=38395a2e&itok=iRMrimgV"
+                src={artworkUrl || "https://www.visithasselt.be/sites/visithasselt/files/styles/teaser_cover/public/2025-02/iedereen-verdient-vakantie.jpg.jpg?h=38395a2e&itok=iRMrimgV"}
                 alt={`Artwork for ${podcast.name}`}
                 className="w-full h-full object-cover"
               />
@@ -261,7 +266,10 @@ const Player: React.FC<PlayerProps> = ({
             <div className="flex-grow min-w-0">
               <p className="font-bold text-brand-text truncate">{podcast.name}</p>
               <div className="w-full bg-brand-surface rounded-full h-1 mt-1 b-border">
-                <div className="bg-brand-primary h-full" style={{ width: `${progressPercent}%` }}></div>
+                <div
+                  className="bg-brand-primary h-full rounded-full transition-all duration-200 ease-linear"
+                  style={{ width: `${progressPercent}%` }}
+                ></div>
               </div>
             </div>
             <div className="flex-shrink-0 flex items-center gap-2">
