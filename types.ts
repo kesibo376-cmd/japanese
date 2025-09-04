@@ -18,5 +18,6 @@ export interface StreakData {
   currentStreak: number;
   history: string[]; // Array of ISO Date Strings
   difficulty: StreakDifficulty;
-  completedToday: string[]; // Array of podcast IDs completed today
+  completionDate: string | null; // ISO Date for the completedToday list
+  completedToday: string[]; // Array of podcast IDs completed on completionDate
 }

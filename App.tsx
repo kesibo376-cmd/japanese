@@ -206,30 +206,24 @@ export default function App() {
   }, [isPlayerExpanded]);
 
   const visiblePodcasts = useMemo(() => {
-    const sorted = [...podcasts].sort((a, b) => {
+    const internalSort = (a: Podcast, b: Podcast) => {
       const numA = parseInt(a.name, 10);
       const numB = parseInt(b.name, 10);
-
-      // If both are not numbers, sort alphabetically
-      if (isNaN(numA) && isNaN(numB)) {
-        return a.name.localeCompare(b.name);
-      }
-      // If only A is not a number, push it to the end
-      if (isNaN(numA)) {
-        return 1;
-      }
-      // If only B is not a number, push it to the end
-      if (isNaN(numB)) {
-        return -1;
-      }
-      // Otherwise, sort numerically
+      if (isNaN(numA) && isNaN(numB)) return a.name.localeCompare(b.name);
+      if (isNaN(numA)) return 1;
+      if (isNaN(numB)) return -1;
       return numA - numB;
-    });
+    };
 
     if (hideCompleted) {
-        return sorted.filter(p => !p.isListened);
+      return [...podcasts].filter(p => !p.isListened).sort(internalSort);
     }
-    return sorted;
+
+    // When not hiding, group completed at the top, then sort each group.
+    const completed = [...podcasts].filter(p => p.isListened).sort(internalSort);
+    const inProgress = [...podcasts].filter(p => !p.isListened).sort(internalSort);
+    
+    return [...completed, ...inProgress];
   }, [podcasts, hideCompleted]);
 
   const handleSelectPodcast = (id: string) => {
@@ -446,6 +440,9 @@ export default function App() {
                 onSelectPodcast={handleSelectPodcast}
                 onDeletePodcast={handleDeletePodcast}
                 onTogglePodcastComplete={handleToggleComplete}
+                hideCompleted={hideCompleted}
+                listenedCount={listenedStats.listenedCount}
+                totalCount={listenedStats.totalCount}
               />
             ) : (
               <div className="text-center py-20 bg-brand-surface rounded-lg b-border">
