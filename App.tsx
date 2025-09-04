@@ -76,6 +76,20 @@ export default function App() {
     }
   }, [setPodcasts, podcasts]);
 
+  // Effect to lock body scroll when player is expanded
+  useEffect(() => {
+    if (isPlayerExpanded) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    // Cleanup on component unmount
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [isPlayerExpanded]);
+
   const handleFileUpload = useCallback((files: FileList) => {
     setIsLoading(true);
 
