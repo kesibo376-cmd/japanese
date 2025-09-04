@@ -7,7 +7,7 @@
     <title>Local Podcast Player</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&family=Source+Sans+Pro:wght@400;600;700&family=VT323&display=swap" rel="stylesheet">
     <style>
       :root, [data-theme="charcoal"] {
         --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -18,6 +18,7 @@
         --brand-primary-hover: #1ED760;
         --brand-text: #FFFFFF;
         --brand-text-secondary: #B3B3B3;
+        --brand-text-on-primary: #121212;
         --brand-border-color: #282828;
       }
       [data-theme="ocean"] {
@@ -29,6 +30,7 @@
         --brand-primary-hover: #57C4C6;
         --brand-text: #E0FBFC;
         --brand-text-secondary: #97C4D3;
+        --brand-text-on-primary: #E0FBFC;
         --brand-border-color: #273850;
       }
       [data-theme="paper"] {
@@ -40,6 +42,7 @@
         --brand-primary-hover: #E57373;
         --brand-text: #3D405B;
         --brand-text-secondary: #818AA3;
+        --brand-text-on-primary: #F8F5F2;
         --brand-border-color: #3D405B;
       }
       [data-theme="brutalist"] {
@@ -51,29 +54,49 @@
         --brand-primary-hover: #0000CC;
         --brand-text: #000000;
         --brand-text-secondary: #555555;
+        --brand-text-on-primary: #F5F5DC;
         --brand-border-color: #000000;
+      }
+      [data-theme="cyber"] {
+        --font-sans: 'VT323', monospace;
+        --brand-bg: #0a0a0a;
+        --brand-surface: #1a1a1a;
+        --brand-surface-light: #2a2a2a;
+        --brand-primary: #00FF00; /* Bright Green */
+        --brand-primary-hover: #33FF33;
+        --brand-text: #00FF00;
+        --brand-text-secondary: #00AA00;
+        --brand-text-on-primary: #0a0a0a;
+        --brand-border-color: #00FF00;
       }
 
       /* Brutalist Overrides */
       [data-theme="brutalist"] .rounded-lg,
       [data-theme="brutalist"] .rounded-md,
-      [data-theme="brutalist"] .rounded-full {
+      [data-theme="brutalist"] .rounded-full,
+      [data-theme="cyber"] .rounded-lg,
+      [data-theme="cyber"] .rounded-md,
+      [data-theme="cyber"] .rounded-full {
         border-radius: 0 !important;
       }
 
-      [data-theme="brutalist"] .b-border {
+      [data-theme="brutalist"] .b-border,
+      [data-theme="cyber"] .b-border {
         border: 2px solid var(--brand-border-color);
       }
 
-      [data-theme="brutalist"] .b-shadow {
+      [data-theme="brutalist"] .b-shadow,
+      [data-theme="cyber"] .b-shadow {
         box-shadow: 4px 4px 0px var(--brand-border-color);
       }
 
-      [data-theme="brutalist"] .b-shadow-hover:hover {
+      [data-theme="brutalist"] .b-shadow-hover:hover,
+      [data-theme="cyber"] .b-shadow-hover:hover {
         box-shadow: 6px 6px 0px var(--brand-border-color);
         transform: translate(-2px, -2px);
       }
-      [data-theme="brutalist"] button.b-shadow-hover:active {
+      [data-theme="brutalist"] button.b-shadow-hover:active,
+      [data-theme="cyber"] button.b-shadow-hover:active {
         box-shadow: 2px 2px 0px var(--brand-border-color);
         transform: translate(2px, 2px);
       }
@@ -91,6 +114,7 @@
             'brand-primary-hover': 'var(--brand-primary-hover)',
             'brand-text': 'var(--brand-text)',
             'brand-text-secondary': 'var(--brand-text-secondary)',
+            'brand-text-on-primary': 'var(--brand-text-on-primary)',
           },
           fontFamily: {
             sans: ['var(--font-sans)', 'sans-serif'],
@@ -109,7 +133,7 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/japanese/assets/index-C--IIFvb.js"></script>
+  <script type="module" crossorigin src="/japanese/assets/index-0O7LSKj2.js"></script>
 </head>
   <body class="bg-brand-bg font-sans">
     <div id="root"></div>
