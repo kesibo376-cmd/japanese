@@ -78,3 +78,23 @@ export async function getPodcastFromDB(id: string): Promise<File | undefined> {
     };
   });
 }
+
+/**
+ * Deletes all files from the 'podcasts' object store in IndexedDB.
+ */
+export async function clearPodcastsInDB(): Promise<void> {
+  const dbInstance = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = dbInstance.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.clear();
+
+    transaction.oncomplete = () => {
+      resolve();
+    };
+
+    transaction.onerror = () => {
+      reject(transaction.error);
+    };
+  });
+}

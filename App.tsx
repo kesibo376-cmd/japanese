@@ -1,11 +1,13 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { Podcast } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
-import { savePodcastToDB } from './lib/db';
+import { savePodcastToDB, clearPodcastsInDB } from './lib/db';
 import FileUpload from './components/FileUpload';
 import PodcastList from './components/PodcastList';
 import Player from './components/Player';
 import StatusBar from './components/StatusBar';
+import SettingsIcon from './components/icons/SettingsIcon';
+import SettingsModal from './components/SettingsModal';
 
 const INITIAL_PODCASTS: Podcast[] = [];
 
@@ -23,6 +25,7 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isPlayerExpanded, setIsPlayerExpanded] = useState<boolean>(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Effect to load pre-defined podcasts from the public folder on initial app load
   useEffect(() => {
@@ -181,6 +184,25 @@ export default function App() {
       }
   };
 
+  const handleResetProgress = useCallback(() => {
+    setIsPlaying(false); // Stop playback for better UX
+    setPodcasts(prev => 
+        prev.map(p => ({ ...p, progress: 0, isListened: false }))
+    );
+  }, [setPodcasts]);
+
+  const handleDeleteAll = useCallback(async () => {
+    try {
+        await clearPodcastsInDB();
+        setPodcasts([]);
+        setCurrentPodcastId(null);
+        setIsPlaying(false);
+        setIsPlayerExpanded(false);
+    } catch (error) {
+        console.error("Failed to delete all podcasts:", error);
+    }
+  }, [setPodcasts]);
+
   const currentPodcast = useMemo(() => 
     podcasts.find(p => p.id === currentPodcastId),
     [podcasts, currentPodcastId]
@@ -222,7 +244,16 @@ export default function App() {
           <div className="max-w-4xl mx-auto">
             <div className="flex justify-between items-center">
               <h1 className="text-2xl sm:text-3xl font-bold">私のポッドキャスト</h1>
-              <FileUpload onFileUpload={handleFileUpload} isLoading={isLoading} />
+              <div className="flex items-center gap-2 sm:gap-4">
+                <FileUpload onFileUpload={handleFileUpload} isLoading={isLoading} />
+                 <button
+                    onClick={() => setIsSettingsOpen(true)}
+                    className="p-2 text-brand-text-secondary hover:text-brand-text rounded-full transition-colors duration-200"
+                    aria-label="Open settings"
+                  >
+                    <SettingsIcon size={24} />
+                  </button>
+              </div>
             </div>
             {podcasts.length > 0 && (
               <StatusBar 
@@ -266,6 +297,13 @@ export default function App() {
           setIsPlayerExpanded={setIsPlayerExpanded}
         />
       )}
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        onResetProgress={handleResetProgress}
+        onDeleteAll={handleDeleteAll}
+      />
     </div>
   );
 }
