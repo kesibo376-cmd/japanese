@@ -11,45 +11,41 @@ interface PodcastListProps {
   onDeletePodcast: (id: string) => void;
   onTogglePodcastComplete: (id: string) => void;
   hideCompleted: boolean;
-  listenedCount: number;
-  totalCount: number;
 }
 
-const PodcastList: React.FC<PodcastListProps> = ({ podcasts, currentPodcastId, isPlaying, onSelectPodcast, onDeletePodcast, onTogglePodcastComplete, hideCompleted, listenedCount, totalCount }) => {
+const PodcastList: React.FC<PodcastListProps> = ({ podcasts, currentPodcastId, isPlaying, onSelectPodcast, onDeletePodcast, onTogglePodcastComplete, hideCompleted }) => {
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const listElement = listRef.current;
     if (!listElement) return;
 
+    // When "Hide Completed" is on, the list is filtered, so we always start from the top.
     if (hideCompleted) {
-        // When hiding completed, the list should always start from the top.
-        listElement.scrollTop = 0;
-        return;
+      listElement.scrollTop = 0;
+      return;
     }
 
+    // When completed items are visible, find the first one that hasn't been listened to.
     const firstUnplayedIndex = podcasts.findIndex(p => !p.isListened);
-
-    // A short timeout allows the DOM to update before we calculate offsets,
-    // preventing potential race conditions with rendering.
-    setTimeout(() => {
-        if (firstUnplayedIndex !== -1) {
-            const firstUnplayedNode = listElement.children[firstUnplayedIndex] as HTMLElement;
-            if (firstUnplayedNode) {
-                listElement.scrollTop = firstUnplayedNode.offsetTop;
-            }
-        } else {
-            // If all are completed, scroll to the top to show the full list.
-            listElement.scrollTop = 0;
-        }
-    }, 0);
-
-  }, [hideCompleted, listenedCount, totalCount]);
+    
+    // If we found an unplayed podcast, scroll to it.
+    if (firstUnplayedIndex !== -1) {
+      const firstUnplayedNode = listElement.children[firstUnplayedIndex] as HTMLElement;
+      // The `relative` class on the container ensures `offsetTop` is calculated correctly.
+      if (firstUnplayedNode) {
+        listElement.scrollTop = firstUnplayedNode.offsetTop;
+      }
+    } else {
+      // If all podcasts are completed, scroll to the top to show the full list.
+      listElement.scrollTop = 0;
+    }
+  }, [podcasts, hideCompleted]); // Depend on podcasts array directly for robustness.
 
   return (
     <div 
       ref={listRef}
-      className="bg-brand-surface rounded-lg overflow-hidden shadow-lg b-border b-shadow max-h-[60vh] overflow-y-auto"
+      className="relative bg-brand-surface rounded-lg overflow-hidden shadow-lg b-border b-shadow max-h-[60vh] overflow-y-auto"
       // Using smooth scrolling for a better user experience when the view auto-scrolls.
       style={{ scrollBehavior: 'smooth' }}
     >

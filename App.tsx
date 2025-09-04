@@ -279,9 +279,15 @@ export default function App() {
     const playId = reviewPrompt.podcastToPlay.id;
 
     setNextPodcastOnEnd(playId);
+
+    // When reviewing, reset progress and mark as not listened again.
     setPodcasts(prev => prev.map(p => 
-        p.id === reviewId ? { ...p, progress: 0 } : p
+        p.id === reviewId ? { ...p, progress: 0, isListened: false } : p
     ));
+    // Also un-record the completion for streak tracking.
+    if (streakData.enabled && streakData.difficulty !== 'easy') {
+        unrecordCompletion(reviewId);
+    }
     
     startPlayback(reviewId);
 
@@ -447,8 +453,6 @@ export default function App() {
                 onDeletePodcast={handleDeletePodcast}
                 onTogglePodcastComplete={handleToggleComplete}
                 hideCompleted={hideCompleted}
-                listenedCount={listenedStats.listenedCount}
-                totalCount={listenedStats.totalCount}
               />
             ) : (
               <div className="text-center py-20 bg-brand-surface rounded-lg b-border">
