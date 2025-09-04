@@ -337,19 +337,25 @@ export default function App() {
   }, [podcasts, setPodcasts, unrecordCompletion, streakData.enabled, streakData.difficulty, currentPodcastId]);
 
   const handleToggleComplete = useCallback((id: string) => {
-    let wasCompleted: boolean | undefined;
+    let wasMarkedComplete: boolean | undefined;
+
     setPodcasts(prev => prev.map(p => {
       if (p.id === id) {
-        wasCompleted = !p.isListened;
-        return { ...p, isListened: !p.isListened, progress: !p.isListened ? p.duration : p.progress };
+        wasMarkedComplete = !p.isListened;
+        return { 
+          ...p, 
+          isListened: !p.isListened, 
+          // When un-marking, reset progress for better UX
+          progress: !p.isListened ? p.duration : 0 
+        };
       }
       return p;
     }));
     
     if (streakData.enabled && streakData.difficulty !== 'easy') {
-        if (wasCompleted) {
+        if (wasMarkedComplete === true) {
             recordCompletion(id);
-        } else {
+        } else if (wasMarkedComplete === false) {
             unrecordCompletion(id);
         }
     }
