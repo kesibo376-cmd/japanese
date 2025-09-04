@@ -28,6 +28,7 @@ export default function App() {
   const [title, setTitle] = useLocalStorage<string>('appTitle', '日本語コース');
   const [theme, setTheme] = useTheme();
   const { streakData, setStreakData, recordActivity } = useStreak();
+  const [hideCompleted, setHideCompleted] = useLocalStorage<boolean>('hideCompleted', false);
   const [currentPodcastId, setCurrentPodcastId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -235,8 +236,8 @@ export default function App() {
     return { listenedCount, totalCount, percentage };
   }, [podcasts]);
 
-  const sortedPodcasts = useMemo(() => {
-    return [...podcasts].sort((a, b) => {
+  const visiblePodcasts = useMemo(() => {
+    const sorted = [...podcasts].sort((a, b) => {
       const numA = parseInt(a.name, 10);
       const numB = parseInt(b.name, 10);
 
@@ -255,7 +256,12 @@ export default function App() {
       // Otherwise, sort numerically
       return numA - numB;
     });
-  }, [podcasts]);
+
+    if (hideCompleted) {
+        return sorted.filter(p => !p.isListened);
+    }
+    return sorted;
+  }, [podcasts, hideCompleted]);
 
   return (
     <div className="text-brand-text min-h-screen">
@@ -324,7 +330,7 @@ export default function App() {
             )}
             {podcasts.length > 0 ? (
               <PodcastList 
-                podcasts={sortedPodcasts}
+                podcasts={visiblePodcasts}
                 currentPodcastId={currentPodcastId}
                 isPlaying={isPlaying}
                 onSelectPodcast={handleSelectPodcast}
@@ -362,6 +368,8 @@ export default function App() {
         onSetTheme={setTheme}
         streakData={streakData}
         onSetStreakData={setStreakData}
+        hideCompleted={hideCompleted}
+        onSetHideCompleted={setHideCompleted}
       />
     </div>
   );

@@ -34,6 +34,13 @@ const Player: React.FC<PlayerProps> = ({
   
   const progressUpdateDebounceRef = useRef<number | undefined>(undefined);
 
+  // State for swipe-to-close gesture
+  const [dragState, setDragState] = useState({
+    isDragging: false,
+    startY: 0,
+    deltaY: 0,
+  });
+
   // Effect to load the correct audio source (URL or IndexedDB blob)
   useEffect(() => {
     let objectUrl: string | null = null;
@@ -81,6 +88,53 @@ const Player: React.FC<PlayerProps> = ({
       audio.pause();
     }
   }, [isPlaying, audioSrc]); // Depend on audioSrc to ensure it runs after source is set
+
+  // Touch gesture handlers for expanded player
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!isPlayerExpanded) return;
+    setDragState({
+      isDragging: true,
+      startY: e.touches[0].clientY,
+      deltaY: 0,
+    });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!dragState.isDragging || !isPlayerExpanded) return;
+
+    const currentY = e.touches[0].clientY;
+    // Allow swiping down only
+    const delta = Math.max(0, currentY - dragState.startY);
+
+    setDragState(prev => ({ ...prev, deltaY: delta }));
+  };
+
+  const handleTouchEnd = () => {
+    if (!dragState.isDragging || !isPlayerExpanded) return;
+
+    // Threshold to decide whether to close or snap back
+    const threshold = window.innerHeight / 4;
+
+    if (dragState.deltaY > threshold) {
+      setIsPlayerExpanded(false);
+    }
+
+    // Reset drag state, which will cause a re-render and trigger CSS snap-back animation if not closing
+    setDragState({
+      isDragging: false,
+      startY: 0,
+      deltaY: 0,
+    });
+  };
+
+  // Style for interactive swipe-down animation
+  const expandedPlayerStyle: React.CSSProperties = dragState.isDragging
+    ? {
+        transition: 'none',
+        transform: `translateY(${dragState.deltaY}px)`,
+      }
+    : {};
+
 
   const handleTimeUpdate = () => {
     if (!audioRef.current) return;
@@ -166,11 +220,16 @@ const Player: React.FC<PlayerProps> = ({
       />
       {/* Player Wrapper */}
       <div 
-        className={`fixed left-0 right-0 z-20 transition-transform duration-500 ease-in-out ${isPlayerExpanded ? 'bottom-0 top-0' : 'bottom-0'}`}
+        className={`fixed left-0 right-0 z-20 transition-all duration-500 ease-in-out ${isPlayerExpanded ? 'bottom-0 top-0' : 'bottom-0'}`}
       >
         {/* Expanded Player */}
         <div 
-          className={`absolute inset-0 bg-brand-bg flex flex-col p-4 sm:p-8 transition-opacity duration-300 ease-in-out ${isPlayerExpanded ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+          className={`absolute inset-0 bg-brand-bg flex flex-col p-4 sm:p-8 transition-transform duration-300 ease-in-out ${isPlayerExpanded ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`}
+          style={expandedPlayerStyle}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
         >
           <div className="flex-shrink-0">
             <button onClick={() => setIsPlayerExpanded(false)} className="text-brand-text-secondary hover:text-brand-text">

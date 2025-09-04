@@ -11,6 +11,8 @@ interface SettingsModalProps {
   onSetTheme: (theme: Theme) => void;
   streakData: StreakData;
   onSetStreakData: React.Dispatch<React.SetStateAction<StreakData>>;
+  hideCompleted: boolean;
+  onSetHideCompleted: (value: boolean) => void;
 }
 
 const THEMES: { id: Theme; name: string }[] = [
@@ -28,6 +30,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onSetTheme,
   streakData,
   onSetStreakData,
+  hideCompleted,
+  onSetHideCompleted,
 }) => {
   if (!isOpen) return null;
 
@@ -85,15 +89,27 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           
           <div>
             <h3 className="text-lg font-semibold text-brand-text mb-3">Features</h3>
-             <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md">
-                <div>
-                    <p className="font-semibold">Enable Streak</p>
-                    <p className="text-sm text-brand-text-secondary">Track your daily listening activity.</p>
+            <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md">
+                    <div>
+                        <p className="font-semibold">Enable Streak</p>
+                        <p className="text-sm text-brand-text-secondary">Track your daily listening activity.</p>
+                    </div>
+                    <ToggleSwitch
+                        isOn={streakData.enabled}
+                        handleToggle={handleStreakToggle}
+                    />
                 </div>
-                <ToggleSwitch
-                    isOn={streakData.enabled}
-                    handleToggle={handleStreakToggle}
-                />
+                <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md">
+                    <div>
+                        <p className="font-semibold">Hide Completed</p>
+                        <p className="text-sm text-brand-text-secondary">Remove listened items from the list.</p>
+                    </div>
+                    <ToggleSwitch
+                        isOn={hideCompleted}
+                        handleToggle={() => onSetHideCompleted(!hideCompleted)}
+                    />
+                </div>
             </div>
           </div>
 
