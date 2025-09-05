@@ -93,12 +93,12 @@ const PodcastItem: React.FC<PodcastItemProps> = ({
       <div className="flex-shrink-0 text-sm text-brand-text-secondary w-12 text-right">
         {formatTime(podcast.duration)}
       </div>
-       <div className="flex-shrink-0" ref={menuRef}>
+       <div className="flex-shrink-0 relative" ref={menuRef}>
           <button onClick={handleMenuToggle} className="p-2 rounded-full hover:bg-brand-surface-light text-brand-text-secondary hover:text-brand-text">
             <ThreeDotsIcon size={20} />
           </button>
           {isMenuOpen && (
-              <div className="absolute right-4 top-12 mt-1 w-48 bg-brand-surface-light rounded-md shadow-lg z-50 b-border animate-scale-in origin-top-right">
+              <div className="absolute right-0 top-full mt-2 w-48 bg-brand-surface-light rounded-md shadow-lg z-50 b-border animate-scale-in origin-top-right">
                   <ul className="py-1">
                       <li>
                           <button 
