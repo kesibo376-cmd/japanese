@@ -2,6 +2,8 @@ import React, { useRef } from 'react';
 import type { Theme, StreakData, StreakDifficulty } from '../types';
 import ToggleSwitch from './ToggleSwitch';
 import ImageIcon from './icons/ImageIcon';
+import DownloadIcon from './icons/DownloadIcon';
+import UploadIcon from './icons/UploadIcon';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -18,6 +20,8 @@ interface SettingsModalProps {
   onSetReviewModeEnabled: (value: boolean) => void;
   customArtwork: string | null;
   onSetCustomArtwork: (artwork: string | null) => void;
+  onExportData: () => void;
+  onImportData: (file: File) => void;
 }
 
 const THEMES: { id: Theme; name: string }[] = [
@@ -50,8 +54,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onSetReviewModeEnabled,
   customArtwork,
   onSetCustomArtwork,
+  onExportData,
+  onImportData,
 }) => {
   const artworkInputRef = useRef<HTMLInputElement>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const handleResetClick = () => {
     onResetProgress();
@@ -95,8 +102,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     };
     reader.readAsDataURL(file);
 
-    // Reset file input to allow uploading the same file again
     if(event.target) {
+        event.target.value = '';
+    }
+  };
+
+  const handleImportFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      onImportData(file);
+    }
+    if (event.target) {
         event.target.value = '';
     }
   };
@@ -231,6 +247,36 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           <div>
             <h3 className="text-lg font-semibold text-brand-text mb-3">Data Management</h3>
             <div className="space-y-2">
+               <button 
+                onClick={onExportData}
+                className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200 b-border flex items-center gap-3"
+              >
+                <DownloadIcon size={20} className="text-brand-text-secondary flex-shrink-0"/>
+                <div>
+                  <p className="font-semibold">Export Progress</p>
+                  <p className="text-sm text-brand-text-secondary">Save your progress to a file.</p>
+                </div>
+              </button>
+              
+              <input
+                type="file"
+                accept=".json"
+                ref={importInputRef}
+                onChange={handleImportFileChange}
+                className="hidden"
+                aria-label="Import progress file"
+              />
+              <button 
+                onClick={() => importInputRef.current?.click()}
+                className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200 b-border flex items-center gap-3"
+              >
+                <UploadIcon size={20} className="text-brand-text-secondary flex-shrink-0"/>
+                <div>
+                  <p className="font-semibold">Import Progress</p>
+                  <p className="text-sm text-brand-text-secondary">Load progress from a file.</p>
+                </div>
+              </button>
+
               <button 
                 onClick={handleResetClick}
                 className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200 b-border"

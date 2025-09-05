@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import type { Podcast, StreakData, Theme } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -368,6 +369,87 @@ export default function App() {
     }
   }, [setPodcasts, recordCompletion, unrecordCompletion, streakData.enabled, streakData.difficulty]);
 
+  const handleExportData = useCallback(() => {
+    const dataToExport = {
+      podcasts,
+      appTitle: title,
+      theme,
+      streakData,
+      hideCompleted,
+      reviewModeEnabled,
+      customArtwork,
+    };
+    
+    const jsonString = JSON.stringify(dataToExport, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `podcast-player-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [podcasts, title, theme, streakData, hideCompleted, reviewModeEnabled, customArtwork]);
+
+  const handleImportData = useCallback((file: File) => {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        try {
+            const result = event.target?.result;
+            if (typeof result !== 'string') {
+                throw new Error("File could not be read as text.");
+            }
+            const importedData = JSON.parse(result);
+
+            if (!importedData.podcasts || !Array.isArray(importedData.podcasts)) {
+                throw new Error("Invalid import file: 'podcasts' array is missing.");
+            }
+            
+            // Overwrite settings and other data
+            if (importedData.appTitle) setTitle(importedData.appTitle);
+            if (importedData.theme) setTheme(importedData.theme);
+            if (importedData.streakData) setStreakData(importedData.streakData);
+            if (typeof importedData.hideCompleted === 'boolean') setHideCompleted(importedData.hideCompleted);
+            if (typeof importedData.reviewModeEnabled === 'boolean') setReviewModeEnabled(importedData.reviewModeEnabled);
+            if (importedData.customArtwork !== undefined) setCustomArtwork(importedData.customArtwork);
+            
+            // Merge podcast progress intelligently
+            setPodcasts(currentPodcasts => {
+                // FIX: Explicitly type the Map to resolve errors where properties on `importedPodcast`
+                // were inaccessible because its type was inferred as `unknown`.
+                const importedPodcastsMap = new Map<string, Podcast>(importedData.podcasts.map((p: Podcast) => [p.id, p]));
+                
+                return currentPodcasts.map(currentPodcast => {
+                    const importedPodcast = importedPodcastsMap.get(currentPodcast.id);
+                    if (importedPodcast) {
+                        return {
+                            ...currentPodcast,
+                            progress: importedPodcast.progress || 0,
+                            isListened: importedPodcast.isListened || false,
+                        };
+                    }
+                    return currentPodcast;
+                });
+            });
+
+            alert('Progress imported successfully!');
+            setIsSettingsOpen(false);
+
+        } catch (error) {
+            console.error("Failed to import data:", error);
+            alert(`Error importing file: ${error instanceof Error ? error.message : "Unknown error"}`);
+        }
+    };
+    reader.onerror = () => {
+        alert('Failed to read the file.');
+    };
+    reader.readAsText(file);
+  }, [setPodcasts, setTitle, setTheme, setStreakData, setHideCompleted, setReviewModeEnabled, setCustomArtwork]);
+
   const currentPodcast = useMemo(() => 
     podcasts.find(p => p.id === currentPodcastId),
     [podcasts, currentPodcastId]
@@ -495,6 +577,8 @@ export default function App() {
         onSetReviewModeEnabled={setReviewModeEnabled}
         customArtwork={customArtwork}
         onSetCustomArtwork={setCustomArtwork}
+        onExportData={handleExportData}
+        onImportData={handleImportData}
       />
       
       <ReviewModal
