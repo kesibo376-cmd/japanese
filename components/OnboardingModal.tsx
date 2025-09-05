@@ -21,7 +21,7 @@ interface OnboardingModalProps {
 
 const THEMES: { id: Theme; name: string }[] = [
   { id: 'charcoal', name: 'Charcoal' },
-  { id: 'paper', name: 'Paper' },
+  { id: 'minecraft', name: 'Minecraft' },
   { id: 'minimal', name: 'Minimal' },
   { id: 'hand-drawn', name: 'Hand-drawn' },
   { id: 'brutalist', name: 'Brutalist' },
@@ -83,21 +83,21 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
   return (
     <div 
-      className={`fixed inset-0 bg-black z-40 p-4 transition-opacity duration-500 ease-in-out ${isOpen ? 'bg-opacity-75' : 'bg-opacity-0 pointer-events-none'}`}
+      className={`fixed inset-0 bg-black z-40 p-4 transition-opacity duration-500 ease-in-out flex items-center justify-center ${isOpen ? 'bg-opacity-75' : 'bg-opacity-0 pointer-events-none'}`}
       role="dialog"
       aria-modal="true"
       aria-labelledby="onboarding-title"
       aria-hidden={!isOpen}
     >
       <div 
-        className={`bg-brand-surface rounded-lg shadow-2xl p-6 w-full max-w-md b-border b-shadow mx-auto my-8 transition-all duration-500 ease-in-out ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+        className={`modal-panel onboarding bg-brand-surface rounded-lg shadow-2xl p-6 w-full max-w-md b-shadow flex flex-col max-h-[90vh] transition-all duration-500 ease-in-out ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
       >
-        <div className="text-center mb-6">
+        <div className="text-center mb-6 flex-shrink-0">
           <h2 id="onboarding-title" className="text-2xl font-bold text-brand-text">Welcome!</h2>
           <p className="text-brand-text-secondary mt-1">Let's get you set up.</p>
         </div>
         
-        <div className="space-y-6 max-h-[80vh] overflow-y-auto pr-2 -mr-2">
+        <div className="space-y-6 overflow-y-auto flex-grow pr-4 -mr-4">
           {/* Section: Title */}
           <div className="space-y-3">
             <h3 className="text-lg font-semibold text-brand-text">1. Name Your Course</h3>
@@ -200,7 +200,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
             </div>
         </div>
 
-        <div className="mt-8">
+        <div className="mt-auto pt-4 border-t border-brand-surface-light flex-shrink-0">
             <button 
                 onClick={onComplete}
                 className="w-full py-3 rounded-md bg-brand-primary text-brand-text-on-primary font-bold hover:bg-brand-primary-hover transition-colors b-border b-shadow b-shadow-hover transform hover:scale-105 active:scale-95"

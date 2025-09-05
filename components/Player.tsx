@@ -286,7 +286,7 @@ const Player: React.FC<PlayerProps> = ({
           <div className="flex-grow flex flex-col items-center justify-center text-center gap-6 sm:gap-8">
             <div className={`w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-brand-surface rounded-lg shadow-2xl overflow-hidden b-border b-shadow transition-transform ${isPlaying ? 'animate-pulse-slow' : ''}`}>
               <img
-                src={artworkUrl || "https://www.visithasselt.be/sites/visithasselt/files/styles/teaser_cover/public/2025-02/iedereen-verdient-vakantie.jpg.jpg?h=38395a2e&itok=iRMrimgV"}
+                src={artworkUrl || "https://i.imgur.com/eB34pCr.png"}
                 alt={`Artwork for ${podcast.name}`}
                 className="w-full h-full object-cover"
               />
@@ -318,7 +318,7 @@ const Player: React.FC<PlayerProps> = ({
             {/* Artwork */}
             <div className="w-12 h-12 flex-shrink-0 bg-brand-surface rounded-md overflow-hidden b-border">
               <img
-                src={artworkUrl || "https://www.visithasselt.be/sites/visithasselt/files/styles/teaser_cover/public/2025-02/iedereen-verdient-vakantie.jpg.jpg?h=38395a2e&itok=iRMrimgV"}
+                src={artworkUrl || "https://i.imgur.com/eB34pCr.png"}
                 alt={`Artwork for ${podcast.name}`}
                 className="w-full h-full object-cover"
               />

@@ -28,7 +28,7 @@ interface SettingsModalProps {
 
 const THEMES: { id: Theme; name: string }[] = [
   { id: 'charcoal', name: 'Charcoal' },
-  { id: 'paper', name: 'Paper' },
+  { id: 'minecraft', name: 'Minecraft' },
   { id: 'minimal', name: 'Minimal' },
   { id: 'hand-drawn', name: 'Hand-drawn' },
   { id: 'brutalist', name: 'Brutalist' },

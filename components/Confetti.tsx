@@ -11,9 +11,9 @@ const THEME_CONFIG: Record<Theme, { colors: string[]; shapes: ('rect' | 'pixel')
     colors: ['#1DB954', '#FFFFFF', '#B3B3B3'],
     shapes: ['rect'],
   },
-  paper: {
-    colors: ['#D95550', '#3D405B', '#F8F5F2'],
-    shapes: ['rect'],
+  minecraft: {
+    colors: ['#55ACEE', '#55EE55', '#EEEE55', '#AAAAAA'],
+    shapes: ['pixel'],
   },
   brutalist: {
     colors: ['#0000FF', '#000000', '#F5F5DC'],
