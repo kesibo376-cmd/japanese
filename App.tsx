@@ -72,6 +72,8 @@ export default function App() {
   const [useCollectionsView, setUseCollectionsView] = useLocalStorage<boolean>('useCollectionsView', true);
   const [isCreateCollectionModalOpen, setIsCreateCollectionModalOpen] = useState(false);
   const [currentView, setCurrentView] = useState<string | null>(null); // null is root, collectionId, or 'uncategorized'
+  const [playOnNavigate, setPlayOnNavigate] = useLocalStorage<boolean>('playOnNavigate', true);
+
 
   // Effect for revealing animation on page load
   useEffect(() => {
@@ -409,6 +411,13 @@ export default function App() {
         }
       }
     }, [allPodcastsSorted, startPlayback]);
+  
+  const handleNavigateToCollection = useCallback((collectionId: string) => {
+    setCurrentView(collectionId);
+    if (playOnNavigate) {
+      handlePlayCollection(collectionId === 'uncategorized' ? null : collectionId);
+    }
+  }, [playOnNavigate, handlePlayCollection]);
 
   const handleResetProgress = useCallback(() => {
     setIsPlaying(false); // Stop playback for better UX
@@ -490,6 +499,7 @@ export default function App() {
       customArtwork,
       completionSound,
       useCollectionsView,
+      playOnNavigate,
     };
     
     const jsonString = JSON.stringify(dataToExport, null, 2);
@@ -503,7 +513,7 @@ export default function App() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [podcasts, collections, title, theme, streakData, hideCompleted, reviewModeEnabled, customArtwork, completionSound, useCollectionsView]);
+  }, [podcasts, collections, title, theme, streakData, hideCompleted, reviewModeEnabled, customArtwork, completionSound, useCollectionsView, playOnNavigate]);
 
   const handleImportData = useCallback((file: File, onSuccess?: () => void) => {
     if (!file) return;
@@ -531,6 +541,8 @@ export default function App() {
             if (importedData.customArtwork !== undefined) setCustomArtwork(importedData.customArtwork);
             if (importedData.completionSound) setCompletionSound(importedData.completionSound);
             if (typeof importedData.useCollectionsView === 'boolean') setUseCollectionsView(importedData.useCollectionsView);
+            if (typeof importedData.playOnNavigate === 'boolean') setPlayOnNavigate(importedData.playOnNavigate);
+
             
             // Merge podcast progress intelligently
             setPodcasts(currentPodcasts => {
@@ -562,7 +574,7 @@ export default function App() {
         alert('Failed to read the file.');
     };
     reader.readAsText(file);
-  }, [setPodcasts, setCollections, setTitle, setTheme, setStreakData, setHideCompleted, setReviewModeEnabled, setCustomArtwork, setCompletionSound, setUseCollectionsView]);
+  }, [setPodcasts, setCollections, setTitle, setTheme, setStreakData, setHideCompleted, setReviewModeEnabled, setCustomArtwork, setCompletionSound, setUseCollectionsView, setPlayOnNavigate]);
 
   const currentPodcast = useMemo(() => 
     podcasts.find(p => p.id === currentPodcastId),
@@ -752,7 +764,7 @@ export default function App() {
                           <CollectionList 
                             collections={collections}
                             podcasts={podcasts}
-                            onNavigateToCollection={setCurrentView}
+                            onNavigateToCollection={handleNavigateToCollection}
                             onPlayCollection={handlePlayCollection}
                             onRenameCollection={handleRenameCollection}
                             onDeleteCollection={handleDeleteCollection}
@@ -877,6 +889,8 @@ export default function App() {
         onSetCompletionSound={setCompletionSound}
         useCollectionsView={useCollectionsView}
         onSetUseCollectionsView={handleToggleCollectionsView}
+        playOnNavigate={playOnNavigate}
+        onSetPlayOnNavigate={setPlayOnNavigate}
       />
       
       <ReviewModal

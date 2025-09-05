@@ -26,6 +26,8 @@ interface SettingsModalProps {
   onSetCompletionSound: (sound: CompletionSound) => void;
   useCollectionsView: boolean;
   onSetUseCollectionsView: (value: boolean) => void;
+  playOnNavigate: boolean;
+  onSetPlayOnNavigate: (value: boolean) => void;
 }
 
 const THEMES: { id: Theme; name: string }[] = [
@@ -72,6 +74,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onSetCompletionSound,
   useCollectionsView,
   onSetUseCollectionsView,
+  playOnNavigate,
+  onSetPlayOnNavigate,
 }) => {
   const artworkInputRef = useRef<HTMLInputElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -250,6 +254,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     <p className="text-sm text-brand-text-secondary">Prompt to review previous lesson.</p>
                 </div>
                 <ToggleSwitch isOn={reviewModeEnabled} handleToggle={() => onSetReviewModeEnabled(!reviewModeEnabled)} />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md b-border">
+                <div>
+                    <p className="font-semibold">Auto-play Collection</p>
+                    <p className="text-sm text-brand-text-secondary">Start playing when opening a collection.</p>
+                </div>
+                <ToggleSwitch isOn={playOnNavigate} handleToggle={() => onSetPlayOnNavigate(!playOnNavigate)} />
             </div>
             <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md b-border">
                 <div>
