@@ -21,3 +21,5 @@ export interface StreakData {
   completionDate: string | null; // ISO Date for the completedToday list
   completedToday: string[]; // Array of podcast IDs completed on completionDate
 }
+
+export type CompletionSound = 'none' | 'minecraft' | 'pokemon' | 'runescape';

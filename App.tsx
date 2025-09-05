@@ -1,7 +1,7 @@
 
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import type { Podcast, StreakData, Theme } from './types';
+import type { Podcast, StreakData, Theme, CompletionSound } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useTheme } from './hooks/useTheme';
 import { useStreak } from './hooks/useStreak';
@@ -26,6 +26,12 @@ const PRELOADED_PODCAST_URLS = [
   // Example: '/audio/my-cool-podcast.mp3',
 ];
 
+const COMPLETION_SOUND_URLS: Record<Exclude<CompletionSound, 'none'>, string> = {
+  minecraft: 'https://www.myinstants.com/media/sounds/levelup.mp3',
+  pokemon: 'https://www.myinstants.com/media/sounds/12_3.mp3',
+  runescape: 'https://www.myinstants.com/media/sounds/runescape-attack-level-up.mp3',
+};
+
 
 export default function App() {
   const [podcasts, setPodcasts] = useLocalStorage<Podcast[]>('podcasts', INITIAL_PODCASTS);
@@ -40,6 +46,7 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const soundAudioRef = useRef<HTMLAudioElement>(null);
   const [reviewModeEnabled, setReviewModeEnabled] = useLocalStorage<boolean>('reviewModeEnabled', false);
   const [reviewPrompt, setReviewPrompt] = useState<{ show: boolean; podcastToReview: Podcast | null; podcastToPlay: Podcast | null }>({ show: false, podcastToReview: null, podcastToPlay: null });
   const [nextPodcastOnEnd, setNextPodcastOnEnd] = useState<string | null>(null);
@@ -48,6 +55,7 @@ export default function App() {
   const [isInitializing, setIsInitializing] = useState(true);
   const [playbackRate, setPlaybackRate] = useLocalStorage<number>('playbackRate', 1);
   const [activePlayerTime, setActivePlayerTime] = useState(0);
+  const [completionSound, setCompletionSound] = useLocalStorage<CompletionSound>('completionSound', 'none');
 
   // Effect for revealing animation on page load
   useEffect(() => {
@@ -279,6 +287,14 @@ export default function App() {
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 5000); // Confetti lasts 5 seconds
       }
+
+      if (completionSound !== 'none') {
+        const soundUrl = COMPLETION_SOUND_URLS[completionSound];
+        if (soundUrl && soundAudioRef.current) {
+          soundAudioRef.current.src = soundUrl;
+          soundAudioRef.current.play().catch(e => console.error("Error playing completion sound:", e));
+        }
+      }
     
       if (currentPodcastId) {
         // The check in updatePodcastProgress is more reliable, but we can ensure it's marked here too.
@@ -487,6 +503,7 @@ export default function App() {
 
   return (
     <div className="text-brand-text min-h-screen">
+      <audio ref={soundAudioRef} preload="auto" />
       {showConfetti && <Confetti count={50} theme={theme} />}
       <div className={`transition-opacity duration-300 ${isPlayerExpanded ? 'opacity-0 invisible' : 'opacity-100 visible'}`}>
         <header className="p-4 sm:p-6 md:p-8">
@@ -627,6 +644,8 @@ export default function App() {
         onSetCustomArtwork={setCustomArtwork}
         onExportData={handleExportData}
         onImportData={handleImportData}
+        completionSound={completionSound}
+        onSetCompletionSound={setCompletionSound}
       />
       
       <ReviewModal

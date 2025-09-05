@@ -337,7 +337,7 @@ const Player: React.FC<PlayerProps> = ({
                 className="text-brand-text-secondary hover:text-brand-text p-2 rounded-full b-border transform transition-transform active:scale-90"
                 aria-label="Skip backward 10 seconds"
               >
-                <RedoIcon size={20} className="backward" />
+                <RedoIcon size={20} className="backward -scale-x-100" />
               </button>
 
               <button

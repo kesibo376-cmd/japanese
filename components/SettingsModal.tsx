@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import type { Theme, StreakData, StreakDifficulty } from '../types';
+import type { Theme, StreakData, StreakDifficulty, CompletionSound } from '../types';
 import ToggleSwitch from './ToggleSwitch';
 import ImageIcon from './icons/ImageIcon';
 import DownloadIcon from './icons/DownloadIcon';
@@ -22,6 +22,8 @@ interface SettingsModalProps {
   onSetCustomArtwork: (artwork: string | null) => void;
   onExportData: () => void;
   onImportData: (file: File) => void;
+  completionSound: CompletionSound;
+  onSetCompletionSound: (sound: CompletionSound) => void;
 }
 
 const THEMES: { id: Theme; name: string }[] = [
@@ -36,7 +38,14 @@ const DIFFICULTIES: { id: StreakDifficulty, name: string, description: string }[
     { id: 'normal', name: 'Normal', description: 'Complete 1 audio.' },
     { id: 'hard', name: 'Hard', description: 'Complete 2 audio files.' },
     { id: 'extreme', name: 'Extreme', description: 'Complete 3 audio files.' },
-]
+];
+
+const SOUNDS: { id: CompletionSound; name: string }[] = [
+  { id: 'none', name: 'None' },
+  { id: 'minecraft', name: 'Minecraft' },
+  { id: 'pokemon', name: 'Pokémon' },
+  { id: 'runescape', name: 'RuneScape' },
+];
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
@@ -55,6 +64,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onSetCustomArtwork,
   onExportData,
   onImportData,
+  completionSound,
+  onSetCompletionSound,
 }) => {
   const artworkInputRef = useRef<HTMLInputElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -240,6 +251,24 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         handleToggle={() => onSetHideCompleted(!hideCompleted)}
                     />
                 </div>
+            </div>
+          </div>
+          
+           <div>
+            <h3 className="text-lg font-semibold text-brand-text mb-3">Completion Sound</h3>
+            <div className="space-y-2">
+              {SOUNDS.map(sound => (
+                <button
+                  key={sound.id}
+                  onClick={() => onSetCompletionSound(sound.id)}
+                  className={`w-full text-left p-3 rounded-md transition-colors duration-200 flex items-center justify-between b-border ${
+                    completionSound === sound.id ? 'bg-brand-primary text-brand-text-on-primary active' : 'bg-brand-surface-light hover:bg-opacity-75'
+                  }`}
+                >
+                  <span>{sound.name}</span>
+                  {completionSound === sound.id && <span className="text-sm">Selected</span>}
+                </button>
+              ))}
             </div>
           </div>
 
