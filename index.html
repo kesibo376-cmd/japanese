@@ -30,7 +30,7 @@
         --brand-primary-hover: #57C4C6;
         --brand-text: #E0FBFC;
         --brand-text-secondary: #97C4D3;
-        --brand-text-on-primary: #E0FBFC;
+        --brand-text-on-primary: #0F1C2E;
         --brand-border-color: #273850;
       }
       [data-theme="paper"] {
@@ -100,6 +100,38 @@
         box-shadow: 2px 2px 0px var(--brand-border-color);
         transform: translate(2px, 2px);
       }
+
+      /* Animations */
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes scaleIn {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+      }
+      @keyframes slideUpFadeIn {
+        from { transform: translateY(10px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+       @keyframes shrinkOut {
+        from { transform: scale(1); height: 100%; opacity: 1; }
+        to { transform: scale(0.9); height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; margin: 0; border: 0;}
+      }
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+      }
+
+      .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+      .animate-scale-in { animation: scaleIn 0.3s ease-out forwards; }
+      .animate-slide-up-fade-in { animation: slideUpFadeIn 0.4s ease-out forwards; opacity: 0; }
+      .animate-shrink-out { animation: shrinkOut 0.3s ease-in-out forwards; }
+      .animate-pulse-slow { animation: pulse 4s ease-in-out infinite; }
+      
+      button, .cursor-pointer {
+        transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+      }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -133,7 +165,7 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/japanese/assets/index-0O7LSKj2.js"></script>
+  <script type="module" crossorigin src="/japanese/assets/index-Bdj-9wIi.js"></script>
 </head>
   <body class="bg-brand-bg font-sans">
     <div id="root"></div>
