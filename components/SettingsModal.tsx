@@ -161,7 +161,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         key={theme.id}
                         onClick={() => onSetTheme(theme.id)}
                         className={`w-full text-center p-2 text-sm rounded-md transition-colors duration-200 b-border ${
-                            currentTheme === theme.id ? 'bg-brand-primary text-brand-text-on-primary active' : 'bg-brand-surface-light hover:bg-opacity-75'
+                            currentTheme === theme.id ? 'active' : 'bg-brand-surface-light hover:bg-opacity-75'
                         }`}
                         >
                         {theme.name}
@@ -223,7 +223,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                             onClick={() => handleDifficultyChange(d.id)}
                             disabled={!streakData.enabled}
                             className={`w-full text-left p-2 rounded-md transition-colors duration-200 flex items-center justify-between text-sm b-border ${
-                                streakData.difficulty === d.id ? 'bg-brand-primary text-brand-text-on-primary active' : 'bg-brand-surface hover:bg-opacity-75'
+                                streakData.difficulty === d.id ? 'active' : 'bg-brand-surface hover:bg-opacity-75'
                             }`}
                         >
                             <div>

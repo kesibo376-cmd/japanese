@@ -519,17 +519,7 @@ export default function App() {
       <OnboardingModal
         isOpen={!hasCompletedOnboarding}
         onComplete={handleOnboardingComplete}
-        title={title}
-        onSetTitle={setTitle}
-        currentTheme={theme}
-        onSetTheme={setTheme}
-        streakData={streakData}
-        onSetStreakData={setStreakData}
-        customArtwork={customArtwork}
-        onSetCustomArtwork={setCustomArtwork}
         onImportData={(file) => handleImportData(file, handleOnboardingComplete)}
-        completionSound={completionSound}
-        onSetCompletionSound={setCompletionSound}
       />
       
       <div className={`transition-all duration-300 ${isPlayerExpanded || !showApp ? 'opacity-0 invisible' : 'opacity-100 visible'} ${!hasCompletedOnboarding ? 'blur-sm' : ''}`}>
