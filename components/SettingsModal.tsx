@@ -29,6 +29,7 @@ interface SettingsModalProps {
 const THEMES: { id: Theme; name: string }[] = [
   { id: 'charcoal', name: 'Charcoal' },
   { id: 'paper', name: 'Paper' },
+  { id: 'glass', name: 'Liquid Glass' },
   { id: 'brutalist', name: 'Brutalist' },
   { id: 'retro-web', name: 'Retro Web' },
 ];

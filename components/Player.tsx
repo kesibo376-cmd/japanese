@@ -277,7 +277,7 @@ const Player: React.FC<PlayerProps> = ({
           onTouchEnd={handleTouchEnd}
           onTouchCancel={handleTouchEnd}
         >
-          <div className="absolute inset-0 -z-10" style={animatedBackgroundStyle} />
+          <div className="absolute inset-0 -z-10 animated-player-bg" style={animatedBackgroundStyle} />
           <div className="flex-shrink-0">
             <button onClick={() => setIsPlayerExpanded(false)} className="text-brand-text-secondary hover:text-brand-text">
               <ChevronDownIcon size={32} />

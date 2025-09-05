@@ -23,11 +23,15 @@ const THEME_CONFIG: Record<Theme, { colors: string[]; shapes: ('rect' | 'pixel')
     colors: ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#000000'],
     shapes: ['pixel'],
   },
+  glass: {
+    colors: ['#0A84FF', '#3399FF', '#FFFFFF', 'rgba(235, 235, 245, 0.6)'],
+    shapes: ['rect'],
+  }
 };
 
 const Confetti: React.FC<ConfettiProps> = ({ count, theme }) => {
   const pieces = useMemo(() => {
-    const config = THEME_CONFIG[theme];
+    const config = THEME_CONFIG[theme] || THEME_CONFIG.charcoal;
 
     return Array.from({ length: count }).map((_, index) => {
       const color = config.colors[Math.floor(Math.random() * config.colors.length)];
