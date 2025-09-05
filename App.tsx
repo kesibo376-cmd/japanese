@@ -47,6 +47,7 @@ export default function App() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [playbackRate, setPlaybackRate] = useLocalStorage<number>('playbackRate', 1);
+  const [activePlayerTime, setActivePlayerTime] = useState(0);
 
   // Effect for revealing animation on page load
   useEffect(() => {
@@ -213,10 +214,14 @@ export default function App() {
   }, [setPodcasts]);
   
   const startPlayback = useCallback((id: string) => {
+    const podcastToPlay = podcasts.find(p => p.id === id);
+    if (podcastToPlay) {
+      setActivePlayerTime(podcastToPlay.progress);
+    }
     setCurrentPodcastId(id);
     setIsPlaying(true);
     if (!isPlayerExpanded) setIsPlayerExpanded(true);
-  }, [isPlayerExpanded]);
+  }, [isPlayerExpanded, podcasts]);
 
   const visiblePodcasts = useMemo(() => {
     const internalSort = (a: Podcast, b: Podcast) => {
@@ -570,6 +575,7 @@ export default function App() {
                   onDeletePodcast={handleDeletePodcast}
                   onTogglePodcastComplete={handleToggleComplete}
                   hideCompleted={hideCompleted}
+                  activePlayerTime={activePlayerTime}
                 />
               </div>
             ) : (
@@ -591,7 +597,7 @@ export default function App() {
           podcast={currentPodcast}
           isPlaying={isPlaying}
           setIsPlaying={setIsPlaying}
-          onProgressUpdate={updatePodcastProgress}
+          onProgressSave={updatePodcastProgress}
           onDurationUpdate={updatePodcastDuration}
           onEnded={handlePlaybackEnd}
           isPlayerExpanded={isPlayerExpanded}
@@ -599,6 +605,8 @@ export default function App() {
           artworkUrl={customArtwork}
           playbackRate={playbackRate}
           onPlaybackRateChange={setPlaybackRate}
+          currentTime={activePlayerTime}
+          onCurrentTimeUpdate={setActivePlayerTime}
         />
       )}
 

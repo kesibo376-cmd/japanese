@@ -11,7 +11,7 @@ interface PlayerProps {
   podcast: Podcast;
   isPlaying: boolean;
   setIsPlaying: (isPlaying: boolean) => void;
-  onProgressUpdate: (id: string, progress: number) => void;
+  onProgressSave: (id: string, progress: number) => void;
   onDurationUpdate: (id: string, duration: number) => void;
   onEnded: () => void;
   isPlayerExpanded: boolean;
@@ -19,6 +19,8 @@ interface PlayerProps {
   artworkUrl?: string | null;
   playbackRate: number;
   onPlaybackRateChange: (rate: number) => void;
+  currentTime: number;
+  onCurrentTimeUpdate: (time: number) => void;
 }
 
 const PLAYBACK_RATES = [0.75, 1, 1.25, 1.5, 2];
@@ -27,7 +29,7 @@ const Player: React.FC<PlayerProps> = ({
   podcast, 
   isPlaying, 
   setIsPlaying, 
-  onProgressUpdate,
+  onProgressSave,
   onDurationUpdate, 
   onEnded,
   isPlayerExpanded,
@@ -35,9 +37,10 @@ const Player: React.FC<PlayerProps> = ({
   artworkUrl,
   playbackRate,
   onPlaybackRateChange,
+  currentTime,
+  onCurrentTimeUpdate,
 }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [currentTime, setCurrentTime] = useState(podcast.progress);
   const [audioSrc, setAudioSrc] = useState<string>('');
   
   const progressUpdateDebounceRef = useRef<number | undefined>(undefined);
@@ -161,13 +164,14 @@ const Player: React.FC<PlayerProps> = ({
 
   const handleTimeUpdate = () => {
     if (!audioRef.current) return;
-    setCurrentTime(audioRef.current.currentTime);
+    const newTime = audioRef.current.currentTime;
+    onCurrentTimeUpdate(newTime);
     
     if (progressUpdateDebounceRef.current) {
       clearTimeout(progressUpdateDebounceRef.current);
     }
     progressUpdateDebounceRef.current = window.setTimeout(() => {
-       onProgressUpdate(podcast.id, audioRef.current?.currentTime || 0);
+       onProgressSave(podcast.id, audioRef.current?.currentTime || 0);
     }, 500);
   };
 
@@ -178,16 +182,16 @@ const Player: React.FC<PlayerProps> = ({
     const offsetX = e.clientX - rect.left;
     const newTime = (offsetX / rect.width) * podcast.duration;
     audioRef.current.currentTime = newTime;
-    setCurrentTime(newTime);
-    onProgressUpdate(podcast.id, newTime);
+    onCurrentTimeUpdate(newTime);
+    onProgressSave(podcast.id, newTime);
   };
   
   const handleSkip = useCallback((seconds: number) => {
     if (!audioRef.current) return;
     const newTime = Math.max(0, Math.min(podcast.duration, audioRef.current.currentTime + seconds));
     audioRef.current.currentTime = newTime;
-    setCurrentTime(newTime);
-  }, [podcast.duration]);
+    onCurrentTimeUpdate(newTime);
+  }, [podcast.duration, onCurrentTimeUpdate]);
 
   const handleCycleSpeed = () => {
     const currentIndex = PLAYBACK_RATES.indexOf(playbackRate);
@@ -252,7 +256,7 @@ const Player: React.FC<PlayerProps> = ({
             if (audioRef.current) {
                 audioRef.current.currentTime = podcast.progress;
                 audioRef.current.playbackRate = playbackRate;
-                setCurrentTime(podcast.progress);
+                onCurrentTimeUpdate(podcast.progress);
                 if (podcast.duration === 0 && audioRef.current.duration) {
                   onDurationUpdate(podcast.id, audioRef.current.duration);
                 }
@@ -333,7 +337,7 @@ const Player: React.FC<PlayerProps> = ({
                 className="text-brand-text-secondary hover:text-brand-text p-2 rounded-full b-border transform transition-transform active:scale-90"
                 aria-label="Skip backward 10 seconds"
               >
-                <RedoIcon size={20} className="transform scale-x-[-1]" />
+                <RedoIcon size={20} className="backward" />
               </button>
 
               <button
@@ -349,7 +353,7 @@ const Player: React.FC<PlayerProps> = ({
                 className="text-brand-text-secondary hover:text-brand-text p-2 rounded-full b-border transform transition-transform active:scale-90"
                 aria-label="Skip forward 10 seconds"
               >
-                <RedoIcon size={20} />
+                <RedoIcon size={20} className="forward" />
               </button>
             </div>
           </div>

@@ -12,9 +12,10 @@ interface PodcastListProps {
   onDeletePodcast: (id: string) => void;
   onTogglePodcastComplete: (id: string) => void;
   hideCompleted: boolean;
+  activePlayerTime: number;
 }
 
-const PodcastList: React.FC<PodcastListProps> = ({ podcasts, currentPodcastId, isPlaying, onSelectPodcast, onDeletePodcast, onTogglePodcastComplete, hideCompleted }) => {
+const PodcastList: React.FC<PodcastListProps> = ({ podcasts, currentPodcastId, isPlaying, onSelectPodcast, onDeletePodcast, onTogglePodcastComplete, hideCompleted, activePlayerTime }) => {
   const listRef = useRef<HTMLDivElement>(null);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
@@ -78,6 +79,7 @@ const PodcastList: React.FC<PodcastListProps> = ({ podcasts, currentPodcastId, i
           isDeleting={deletingIds.has(podcast.id)}
           onAnimationEnd={() => handleAnimationEnd(podcast.id)}
           style={{ animationDelay: `${index * 30}ms` }}
+          progressOverride={currentPodcastId === podcast.id ? activePlayerTime : undefined}
         />
       ))}
     </div>

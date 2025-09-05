@@ -16,6 +16,7 @@ interface PodcastItemProps {
   onAnimationEnd: () => void;
   isDeleting: boolean;
   style: React.CSSProperties;
+  progressOverride?: number;
 }
 
 const PodcastItem: React.FC<PodcastItemProps> = ({ 
@@ -28,12 +29,14 @@ const PodcastItem: React.FC<PodcastItemProps> = ({
   onAnimationEnd,
   isDeleting,
   style,
+  progressOverride,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   
   const isCompleted = podcast.isListened;
-  const progressPercent = isCompleted ? 100 : podcast.duration > 0 ? (podcast.progress / podcast.duration) * 100 : 0;
+  const progressToShow = progressOverride !== undefined ? progressOverride : podcast.progress;
+  const progressPercent = isCompleted ? 100 : podcast.duration > 0 ? (progressToShow / podcast.duration) * 100 : 0;
   
   // Close menu when clicking outside
   useEffect(() => {
@@ -87,7 +90,7 @@ const PodcastItem: React.FC<PodcastItemProps> = ({
         <div className="mt-2 w-full bg-brand-surface rounded-full h-1.5">
           <div
             className="bg-brand-primary h-1.5 rounded-full"
-            style={{ width: `${progressPercent}%` }}
+            style={{ width: `${progressPercent}%`, transition: isActive ? 'width 0.2s linear' : 'none' }}
           ></div>
         </div>
       </div>
