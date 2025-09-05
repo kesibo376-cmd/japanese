@@ -24,6 +24,10 @@
         --brand-gradient-start: #1DB95420;
         --brand-gradient-end: #121212;
       }
+      [data-theme="charcoal"] button.active {
+        background-color: var(--brand-surface-light);
+        border: 1px solid var(--brand-primary);
+      }
       [data-theme="minecraft"] {
         --font-sans: 'VT323', monospace;
         --brand-bg: #5E3A1E; /* Dirt color for fallback */
@@ -143,6 +147,12 @@
       [data-theme="minimal"] .animated-player-bg {
         background: var(--brand-surface) !important;
       }
+      [data-theme="minimal"] button.active {
+        background-color: #e5e5ea;
+        color: var(--brand-text);
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+        transform: translateY(0);
+      }
       
       /* Specific overrides for Hand-drawn Theme */
       [data-theme="hand-drawn"] body {
@@ -167,6 +177,11 @@
         }
        [data-theme="hand-drawn"] .redo-icon {
           transform: rotate(5deg);
+        }
+       [data-theme="hand-drawn"] button.active {
+          transform: translateY(1px) rotate(0.2deg);
+          box-shadow: 2px 2px 0px 0px rgba(58,58,58,0.2);
+          background-color: var(--brand-surface-light);
         }
 
       /* Minecraft Theme Overrides */
@@ -339,6 +354,11 @@
       [data-theme="brutalist"] button.b-shadow-hover:active {
         box-shadow: 2px 2px 0px var(--brand-border-color);
         transform: translate(2px, 2px);
+      }
+      [data-theme="brutalist"] button.active {
+        background-color: var(--brand-surface-light);
+        box-shadow: inset 2px 2px 0px var(--brand-border-color);
+        transform: none;
       }
       [data-theme="retro-web"] .b-shadow-hover:hover,
       [data-theme="retro-web"] button.b-shadow-hover:active {
