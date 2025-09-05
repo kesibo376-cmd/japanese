@@ -334,7 +334,7 @@ export default function App() {
         setIsPlayerExpanded(false);
         setStreakData(prev => ({...prev, completedToday: [] }));
     } catch (error) {
-        console.error("Failed to delete all podcasts:", error);
+        console.error("Failed to delete all audio files:", error);
     }
   }, [setPodcasts, setStreakData]);
 
@@ -346,7 +346,7 @@ export default function App() {
       try {
         await deletePodcastFromDB(id);
       } catch (error) {
-        console.error("Failed to delete podcast from DB:", error);
+        console.error("Failed to delete audio file from DB:", error);
       }
     }
     setPodcasts(prev => prev.filter(p => p.id !== id));
@@ -401,7 +401,7 @@ export default function App() {
     
     const a = document.createElement('a');
     a.href = url;
-    a.download = `podcast-player-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `audio-player-backup-${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -574,7 +574,7 @@ export default function App() {
                 className={`text-center py-20 bg-brand-surface rounded-lg b-border ${isInitializing ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
                 style={{ animationDelay: '300ms' }}
               >
-                <h2 className="text-xl font-semibold">No Podcasts Yet</h2>
+                <h2 className="text-xl font-semibold">No Audio Files Yet</h2>
                 <p className="text-brand-text-secondary mt-2">Click "Add Audio" to get started.</p>
               </div>
             )}

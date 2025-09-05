@@ -60,7 +60,7 @@ const Player: React.FC<PlayerProps> = ({
           objectUrl = URL.createObjectURL(file);
           setAudioSrc(objectUrl);
         } else {
-          console.error("Could not find podcast in the database.");
+          console.error("Could not find audio file in the database.");
           // Handle error, maybe show a message to the user
         }
       } else {
@@ -141,7 +141,9 @@ const Player: React.FC<PlayerProps> = ({
       deltaY: 0,
     });
   };
-
+  
+  const progressPercent = podcast.duration > 0 ? (currentTime / podcast.duration) * 100 : 0;
+  
   // Style for interactive swipe-down animation
   const expandedPlayerStyle: React.CSSProperties = dragState.isDragging
     ? {
@@ -149,6 +151,12 @@ const Player: React.FC<PlayerProps> = ({
         transform: `translateY(${dragState.deltaY}px)`,
       }
     : {};
+    
+  // Style for animated background
+  const animatedBackgroundStyle: React.CSSProperties = {
+    background: `linear-gradient(${progressPercent * 3.6}deg, var(--brand-gradient-start), var(--brand-gradient-end))`,
+    transition: 'background 1s linear',
+  };
 
 
   const handleTimeUpdate = () => {
@@ -186,8 +194,6 @@ const Player: React.FC<PlayerProps> = ({
     const nextIndex = (currentIndex + 1) % PLAYBACK_RATES.length;
     onPlaybackRateChange(PLAYBACK_RATES[nextIndex]);
   };
-
-  const progressPercent = podcast.duration > 0 ? (currentTime / podcast.duration) * 100 : 0;
 
   const sharedProgressBar = (
     <div className="w-full">
@@ -260,13 +266,14 @@ const Player: React.FC<PlayerProps> = ({
       >
         {/* Expanded Player */}
         <div 
-          className={`absolute inset-0 bg-brand-bg flex flex-col p-4 sm:p-8 transition-transform duration-300 ease-in-out ${isPlayerExpanded ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`}
+          className={`absolute inset-0 flex flex-col p-4 sm:p-8 transition-transform duration-300 ease-in-out ${isPlayerExpanded ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`}
           style={expandedPlayerStyle}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           onTouchCancel={handleTouchEnd}
         >
+          <div className="absolute inset-0 -z-10" style={animatedBackgroundStyle} />
           <div className="flex-shrink-0">
             <button onClick={() => setIsPlayerExpanded(false)} className="text-brand-text-secondary hover:text-brand-text">
               <ChevronDownIcon size={32} />

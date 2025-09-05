@@ -33,7 +33,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, isLoading }) => {
         onChange={handleFileChange}
         multiple
         className="hidden"
-        aria-label="Upload podcast files"
+        aria-label="Upload audio files"
       />
       <button
         onClick={handleClick}
@@ -51,7 +51,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, isLoading }) => {
         ) : (
           <>
             <PlusIcon size={20} />
-            <span className="hidden sm:inline ml-2 font-bold">Add Podcast</span>
+            <span className="hidden sm:inline ml-2 font-bold">Add Audio</span>
           </>
         )}
       </button>

@@ -49,7 +49,7 @@ const PodcastList: React.FC<PodcastListProps> = ({ podcasts, currentPodcastId, i
   }, [podcasts, deletingIds]);
   
   const handleDeleteRequest = (id: string) => {
-    if (window.confirm(`Are you sure you want to delete this podcast?`)) {
+    if (window.confirm(`Are you sure you want to delete this audio file?`)) {
       setDeletingIds(prev => new Set(prev).add(id));
     }
   };

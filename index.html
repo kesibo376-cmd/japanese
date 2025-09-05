@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" href="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3e%3crect width='64' height='64' fill='black'/%3e%3cg fill='white'%3e%3crect x='18' y='26' width='8' height='12' rx='2'/%3e%3crect x='28' y='18' width='8' height='28' rx='2'/%3e%3crect x='38' y='22' width='8' height='20' rx='2'/%3e%3c/g%3e%3c/svg%3e" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Local Podcast Player</title>
+    <title>Audio Player</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&family=Source+Sans+Pro:wght@400;600;700&family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -20,6 +20,8 @@
         --brand-text-secondary: #B3B3B3;
         --brand-text-on-primary: #121212;
         --brand-border-color: #282828;
+        --brand-gradient-start: #1DB95420;
+        --brand-gradient-end: #121212;
       }
       [data-theme="paper"] {
         --font-sans: "Lora", serif;
@@ -32,6 +34,8 @@
         --brand-text-secondary: #818AA3;
         --brand-text-on-primary: #F8F5F2;
         --brand-border-color: #3D405B;
+        --brand-gradient-start: #D9555020;
+        --brand-gradient-end: #F8F5F2;
       }
       [data-theme="brutalist"] {
         --font-sans: 'Courier New', monospace;
@@ -44,6 +48,8 @@
         --brand-text-secondary: #555555;
         --brand-text-on-primary: #F5F5DC;
         --brand-border-color: #000000;
+        --brand-gradient-start: #0000FF20;
+        --brand-gradient-end: #F5F5DC;
       }
       [data-theme="retro-web"] {
         --font-sans: 'Press Start 2P', monospace;
@@ -56,6 +62,8 @@
         --brand-text-secondary: #404040;
         --brand-text-on-primary: #FFFFFF;
         --brand-border-color: #000000;
+        --brand-gradient-start: #00008020;
+        --brand-gradient-end: #C0C0C0;
         cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAeCAYAAAAsEj5rAAAAAXNSR0IArs4c6QAAANhJREFUWEftlVsOwjAIQ/1e7+L9X+1HVEij2gns2kABKcefi2sSg83g350B4xgX/gGOAywYdJBCBAc8kMMEKxQA8MkhDj3A0QDHB2gA0kF6AEgB6QWgo9ADQANIC8AqCE2ACaAXYAM4b1kCaIHc7wO6iU9p+Np/oA7q5gS0gS1ALtS12tYAVhX427YGrCpw560BfCsw9acAvhS4+aeADwUu/mXA4wIXvynA8QJ3fy3AqQJ3/zHgFID7Bzw+wL2fDPgYwP2vDPgQwP1nDPgEwP1DD/gGgPtvD/AIAPffPcA5APB67wDkH//8/gH0ZJQf2V5ARwAAAABJRU5ErkJggg=='), auto;
         background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAAXNSR0IArs4c6QAAABNJREFUGFdjZGBg+M+ABTAx/A8A4a8f9L3ONmcAAAAASUVORK5CYII=');
         background-repeat: repeat;

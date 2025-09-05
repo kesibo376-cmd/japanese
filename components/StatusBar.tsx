@@ -19,7 +19,7 @@ const StatusBar: React.FC<StatusBarProps> = ({ listenedCount, totalCount, percen
         aria-valuenow={percentage}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label="Podcast listening progress"
+        aria-label="Audio listening progress"
       >
         <div 
           className="bg-brand-primary h-full transition-all duration-500 ease-out" 

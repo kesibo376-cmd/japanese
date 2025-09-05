@@ -32,10 +32,10 @@ const THEMES: { id: Theme; name: string }[] = [
 ];
 
 const DIFFICULTIES: { id: StreakDifficulty, name: string, description: string }[] = [
-    { id: 'easy', name: 'Easy', description: 'Listen to any podcast.' },
-    { id: 'normal', name: 'Normal', description: 'Complete 1 podcast.' },
-    { id: 'hard', name: 'Hard', description: 'Complete 2 podcasts.' },
-    { id: 'extreme', name: 'Extreme', description: 'Complete 3 podcasts.' },
+    { id: 'easy', name: 'Easy', description: 'Listen to any audio.' },
+    { id: 'normal', name: 'Normal', description: 'Complete 1 audio.' },
+    { id: 'hard', name: 'Hard', description: 'Complete 2 audio files.' },
+    { id: 'extreme', name: 'Extreme', description: 'Complete 3 audio files.' },
 ]
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -65,7 +65,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   const handleDeleteClick = () => {
-    if (window.confirm('Are you sure you want to delete all podcasts? This action cannot be undone.')) {
+    if (window.confirm('Are you sure you want to delete all audio files? This action cannot be undone.')) {
       onDeleteAll();
       onClose();
     }
@@ -281,14 +281,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200 b-border"
               >
                 <p className="font-semibold">Reset Progress</p>
-                <p className="text-sm text-brand-text-secondary">Mark all podcasts as unplayed and reset progress.</p>
+                <p className="text-sm text-brand-text-secondary">Mark all audio files as unplayed and reset progress.</p>
               </button>
               
               <button 
                 onClick={handleDeleteClick}
                 className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200 text-red-500 b-border"
               >
-                <p className="font-semibold">Delete All Podcasts</p>
+                <p className="font-semibold">Delete All Audio Files</p>
                 <p className="text-sm">Permanently remove all audio files and data.</p>
               </button>
             </div>
