@@ -1,4 +1,5 @@
 
+
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import type { Podcast, StreakData, Theme } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -477,6 +478,8 @@ export default function App() {
     return { listenedCount, totalCount, percentage };
   }, [podcasts]);
 
+  const showStreakTracker = streakData.enabled && podcasts.length > 0;
+
   return (
     <div className="text-brand-text min-h-screen">
       {showConfetti && <Confetti count={50} theme={theme} />}
@@ -546,7 +549,7 @@ export default function App() {
 
         <main className="p-4 sm:p-6 md:p-8 pt-0">
           <div className="max-w-4xl mx-auto">
-            {streakData.enabled && podcasts.length > 0 && (
+            {showStreakTracker && (
               <div
                 className={`mb-6 ${isInitializing ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
                 style={{ animationDelay: '300ms' }}
@@ -556,8 +559,8 @@ export default function App() {
             )}
             {podcasts.length > 0 ? (
               <div
-                className={`${isInitializing ? 'opacity-0' : 'animate-fade-in'}`}
-                style={{ animationDelay: '350ms' }}
+                className={`${isInitializing ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                style={{ animationDelay: showStreakTracker ? '400ms' : '300ms' }}
               >
                 <PodcastList 
                   podcasts={visiblePodcasts}

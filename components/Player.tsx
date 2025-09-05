@@ -5,7 +5,7 @@ import { formatTime } from '../lib/utils';
 import PlayIcon from './icons/PlayIcon';
 import PauseIcon from './icons/PauseIcon';
 import ChevronDownIcon from './icons/ChevronDownIcon';
-import ChevronUpIcon from './icons/ChevronUpIcon';
+import RedoIcon from './icons/RedoIcon';
 
 interface PlayerProps {
   podcast: Podcast;
@@ -296,34 +296,60 @@ const Player: React.FC<PlayerProps> = ({
         </div>
 
         {/* Mini Player */}
-        <div 
-          className={`absolute bottom-0 left-0 right-0 bg-brand-surface-light p-4 shadow-2xl border-t border-brand-surface transition-transform duration-500 ease-in-out cursor-pointer ${isPlayerExpanded ? 'translate-y-full' : 'translate-y-0'} b-border`}
+        <div
+          className={`absolute bottom-0 left-0 right-0 bg-brand-surface-light shadow-2xl transition-transform duration-500 ease-in-out cursor-pointer b-border ${isPlayerExpanded ? 'translate-y-full' : 'translate-y-0'}`}
           onClick={() => setIsPlayerExpanded(true)}
+          role="button"
+          aria-label="Expand player"
         >
-          <div className="max-w-4xl mx-auto flex items-center gap-4">
+          {/* Progress Bar */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-brand-surface">
+            <div
+              className="bg-brand-primary h-full"
+              style={{ width: `${progressPercent}%`, transition: 'width 0.2s linear' }}
+            />
+          </div>
+
+          <div className="max-w-4xl mx-auto flex items-center gap-3 p-2 sm:p-3">
+            {/* Artwork */}
+            <div className="w-12 h-12 flex-shrink-0 bg-brand-surface rounded-md overflow-hidden b-border">
+              <img
+                src={artworkUrl || "https://www.visithasselt.be/sites/visithasselt/files/styles/teaser_cover/public/2025-02/iedereen-verdient-vakantie.jpg.jpg?h=38395a2e&itok=iRMrimgV"}
+                alt={`Artwork for ${podcast.name}`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Title */}
             <div className="flex-grow min-w-0">
               <p className="font-bold text-brand-text truncate">{podcast.name}</p>
-              <div className="w-full bg-brand-surface rounded-full h-1 mt-1 b-border">
-                <div
-                  className="bg-brand-primary h-full rounded-full transition-all duration-200 ease-linear"
-                  style={{ width: `${progressPercent}%` }}
-                ></div>
-              </div>
+              <p className="text-xs text-brand-text-secondary">{formatTime(currentTime)} / {formatTime(podcast.duration)}</p>
             </div>
-            <div className="flex-shrink-0 flex items-center gap-2">
-               <button 
-                onClick={(e) => { e.stopPropagation(); setIsPlaying(!isPlaying); }} 
-                className="text-brand-text p-2 rounded-full hover:bg-brand-surface b-border transform transition-transform active:scale-90"
+
+            {/* Controls */}
+            <div className="flex-shrink-0 flex items-center gap-1 sm:gap-2">
+              <button
+                onClick={(e) => { e.stopPropagation(); handleSkip(-10); }}
+                className="text-brand-text-secondary hover:text-brand-text p-2 rounded-full b-border transform transition-transform active:scale-90"
+                aria-label="Skip backward 10 seconds"
+              >
+                <RedoIcon size={20} className="transform scale-x-[-1]" />
+              </button>
+
+              <button
+                onClick={(e) => { e.stopPropagation(); setIsPlaying(!isPlaying); }}
+                className="text-brand-text p-3 rounded-full hover:bg-brand-surface b-border transform transition-transform active:scale-90"
                 aria-label={isPlaying ? "Pause" : "Play"}
               >
                 {isPlaying ? <PauseIcon size={24} /> : <PlayIcon size={24} />}
               </button>
-              <button 
-                onClick={(e) => {e.stopPropagation(); setIsPlayerExpanded(true)}}
-                className="text-brand-text-secondary hover:text-brand-text p-2"
-                aria-label="Expand player"
+
+              <button
+                onClick={(e) => { e.stopPropagation(); handleSkip(10); }}
+                className="text-brand-text-secondary hover:text-brand-text p-2 rounded-full b-border transform transition-transform active:scale-90"
+                aria-label="Skip forward 10 seconds"
               >
-                  <ChevronUpIcon size={24} />
+                <RedoIcon size={20} />
               </button>
             </div>
           </div>
