@@ -68,6 +68,7 @@ const PodcastItem: React.FC<PodcastItemProps> = ({
         ${isActive ? 'bg-brand-surface-light' : 'hover:bg-brand-surface hover:-translate-y-0.5'}
         ${isCompleted && !isActive ? 'opacity-60' : ''}
         ${isDeleting ? 'animate-shrink-out' : 'animate-slide-up-fade-in'}
+        ${isMenuOpen ? 'z-10' : ''}
       `}
     >
       <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
