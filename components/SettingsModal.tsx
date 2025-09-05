@@ -24,6 +24,8 @@ interface SettingsModalProps {
   onImportData: (file: File) => void;
   completionSound: CompletionSound;
   onSetCompletionSound: (sound: CompletionSound) => void;
+  useCollectionsView: boolean;
+  onSetUseCollectionsView: (value: boolean) => void;
 }
 
 const THEMES: { id: Theme; name: string }[] = [
@@ -68,6 +70,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onImportData,
   completionSound,
   onSetCompletionSound,
+  useCollectionsView,
+  onSetUseCollectionsView,
 }) => {
   const artworkInputRef = useRef<HTMLInputElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -206,6 +210,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* Section: Features */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-brand-text border-b border-brand-surface-light pb-2">Features</h3>
+            <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md b-border">
+                <div>
+                    <p className="font-semibold">Organize with Collections</p>
+                    <p className="text-sm text-brand-text-secondary">Group audio files into folders.</p>
+                </div>
+                <ToggleSwitch isOn={useCollectionsView} handleToggle={() => onSetUseCollectionsView(!useCollectionsView)} />
+            </div>
             <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md b-border">
                 <div>
                     <p className="font-semibold">Enable Streak</p>

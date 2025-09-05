@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import type { Collection } from '../types';
 import ThreeDotsIcon from './icons/ThreeDotsIcon';
@@ -66,7 +65,12 @@ const CollectionItem: React.FC<CollectionItemProps> = (props) => {
         <div className="relative text-center flex flex-col items-center justify-center gap-2 transition-opacity duration-300 md:group-hover:opacity-0 pointer-events-none">
             <span className="absolute -top-8 text-sm font-bold text-brand-text-secondary">{collection.podcastCount} item{collection.podcastCount !== 1 ? 's' : ''}</span>
             <FolderIcon size={64} className="text-brand-text-secondary" />
-            <h2 className="font-bold text-lg truncate w-full px-2" title={collection.name}>{collection.name}</h2>
+            <div className="relative w-full h-14 flex items-center justify-center overflow-hidden">
+                <h2 className="font-bold text-lg w-full px-2 text-center" title={collection.name}>
+                    {collection.name}
+                </h2>
+                <div className="absolute bottom-0 left-0 w-full h-3 bg-gradient-to-t from-brand-surface to-transparent pointer-events-none" aria-hidden="true" />
+            </div>
         </div>
 
         {/* Hover Overlay */}

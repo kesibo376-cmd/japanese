@@ -1,6 +1,7 @@
 
 
 
+
 import React, { useRef, useEffect, useState } from 'react';
 import type { Podcast, Collection } from '../types';
 import PodcastItem from './PodcastItem';
@@ -16,10 +17,11 @@ interface PodcastListProps {
   hideCompleted: boolean;
   activePlayerTime: number;
   collections: Collection[];
+  useCollectionsView: boolean;
 }
 
 const PodcastList: React.FC<PodcastListProps> = (props) => {
-  const { podcasts, currentPodcastId, isPlaying, onSelectPodcast, onDeletePodcast, onTogglePodcastComplete, onMovePodcastToCollection, hideCompleted, activePlayerTime, collections } = props;
+  const { podcasts, currentPodcastId, isPlaying, onSelectPodcast, onDeletePodcast, onTogglePodcastComplete, onMovePodcastToCollection, hideCompleted, activePlayerTime, collections, useCollectionsView } = props;
   const listRef = useRef<HTMLDivElement>(null);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
@@ -64,6 +66,7 @@ const PodcastList: React.FC<PodcastListProps> = (props) => {
           onAnimationEnd={() => handleAnimationEnd(podcast.id)}
           style={{ animationDelay: `${index * 30}ms` }}
           progressOverride={currentPodcastId === podcast.id ? activePlayerTime : undefined}
+          useCollectionsView={useCollectionsView}
         />
       ))}
     </div>

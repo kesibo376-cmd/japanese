@@ -20,6 +20,7 @@ interface PodcastItemProps {
   isDeleting: boolean;
   style: React.CSSProperties;
   progressOverride?: number;
+  useCollectionsView: boolean;
 }
 
 const PodcastItem: React.FC<PodcastItemProps> = ({ 
@@ -35,6 +36,7 @@ const PodcastItem: React.FC<PodcastItemProps> = ({
   isDeleting,
   style,
   progressOverride,
+  useCollectionsView,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMoveMenuOpen, setIsMoveMenuOpen] = useState(false);
@@ -121,40 +123,42 @@ const PodcastItem: React.FC<PodcastItemProps> = ({
                             {isCompleted ? 'Unmark as completed' : 'Mark as completed'}
                           </button>
                       </li>
-                      <li className="relative">
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); setIsMoveMenuOpen(prev => !prev); }}
-                          className="w-full text-left px-4 py-2 text-sm text-brand-text hover:bg-brand-surface flex justify-between items-center"
-                        >
-                          Move to... <ChevronRightIcon size={16} className={`${isMoveMenuOpen ? 'rotate-180' : ''} transition-transform`}/>
-                        </button>
-                        {isMoveMenuOpen && (
-                            <div className="absolute right-full top-0 mr-1 w-48 bg-brand-surface-light rounded-md shadow-lg b-border">
-                                <ul className="py-1 max-h-48 overflow-y-auto">
-                                    <li>
-                                      <button 
-                                        onClick={(e) => handleAction(e, () => onMoveRequest(podcast.id, null))} 
-                                        className="w-full text-left px-4 py-2 text-sm text-brand-text hover:bg-brand-surface disabled:opacity-50"
-                                        disabled={podcast.collectionId === null}
-                                      >
-                                        Uncategorized
-                                      </button>
-                                    </li>
-                                    {collections.map(c => (
-                                        <li key={c.id}>
-                                            <button
-                                                onClick={(e) => handleAction(e, () => onMoveRequest(podcast.id, c.id))}
-                                                className="w-full text-left px-4 py-2 text-sm text-brand-text hover:bg-brand-surface disabled:opacity-50"
-                                                disabled={podcast.collectionId === c.id}
-                                            >
-                                                {c.name}
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                      </li>
+                      {useCollectionsView && (
+                        <li className="relative">
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); setIsMoveMenuOpen(prev => !prev); }}
+                            className="w-full text-left px-4 py-2 text-sm text-brand-text hover:bg-brand-surface flex justify-between items-center"
+                          >
+                            Move to... <ChevronRightIcon size={16} className={`${isMoveMenuOpen ? 'rotate-180' : ''} transition-transform`}/>
+                          </button>
+                          {isMoveMenuOpen && (
+                              <div className="absolute right-full top-0 mr-1 w-48 bg-brand-surface-light rounded-md shadow-lg b-border">
+                                  <ul className="py-1 max-h-48 overflow-y-auto">
+                                      <li>
+                                        <button 
+                                          onClick={(e) => handleAction(e, () => onMoveRequest(podcast.id, null))} 
+                                          className="w-full text-left px-4 py-2 text-sm text-brand-text hover:bg-brand-surface disabled:opacity-50"
+                                          disabled={podcast.collectionId === null}
+                                        >
+                                          Uncategorized
+                                        </button>
+                                      </li>
+                                      {collections.map(c => (
+                                          <li key={c.id}>
+                                              <button
+                                                  onClick={(e) => handleAction(e, () => onMoveRequest(podcast.id, c.id))}
+                                                  className="w-full text-left px-4 py-2 text-sm text-brand-text hover:bg-brand-surface disabled:opacity-50"
+                                                  disabled={podcast.collectionId === c.id}
+                                              >
+                                                  {c.name}
+                                              </button>
+                                          </li>
+                                      ))}
+                                  </ul>
+                              </div>
+                          )}
+                        </li>
+                      )}
                       <li>
                            <button 
                             onClick={(e) => handleAction(e, () => onDeleteRequest(podcast.id))}

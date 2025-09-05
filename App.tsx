@@ -18,6 +18,7 @@ import StreakTracker from './components/StreakTracker';
 import ReviewModal from './components/ReviewModal';
 import Confetti from './components/Confetti';
 import CategorizeModal from './components/CategorizeModal';
+import CreateCollectionModal from './components/CreateCollectionModal';
 import ChevronLeftIcon from './components/icons/ChevronLeftIcon';
 import PodcastList from './components/PodcastList';
 import PlayIcon from './components/icons/PlayIcon';
@@ -68,6 +69,8 @@ export default function App() {
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useLocalStorage<boolean>('hasCompletedOnboarding', false);
   const [podcastsToCategorize, setPodcastsToCategorize] = useState<Podcast[]>([]);
   const [isCategorizeModalOpen, setIsCategorizeModalOpen] = useState(false);
+  const [useCollectionsView, setUseCollectionsView] = useLocalStorage<boolean>('useCollectionsView', true);
+  const [isCreateCollectionModalOpen, setIsCreateCollectionModalOpen] = useState(false);
   const [currentView, setCurrentView] = useState<string | null>(null); // null is root, collectionId, or 'uncategorized'
 
   // Effect for revealing animation on page load
@@ -131,7 +134,7 @@ export default function App() {
 
   // Effect to lock body scroll when player is expanded or settings are open
   useEffect(() => {
-    const shouldLockScroll = isPlayerExpanded || isSettingsOpen || !hasCompletedOnboarding || isCategorizeModalOpen;
+    const shouldLockScroll = isPlayerExpanded || isSettingsOpen || !hasCompletedOnboarding || isCategorizeModalOpen || isCreateCollectionModalOpen;
     if (shouldLockScroll) {
       document.body.classList.add('overflow-hidden');
     } else {
@@ -142,7 +145,7 @@ export default function App() {
     return () => {
       document.body.classList.remove('overflow-hidden');
     };
-  }, [isPlayerExpanded, isSettingsOpen, hasCompletedOnboarding, isCategorizeModalOpen]);
+  }, [isPlayerExpanded, isSettingsOpen, hasCompletedOnboarding, isCategorizeModalOpen, isCreateCollectionModalOpen]);
 
   // Effect to focus the title input when editing starts
   useEffect(() => {
@@ -153,15 +156,17 @@ export default function App() {
   }, [isEditingTitle]);
 
   const handleAssignToCollection = useCallback((podcastsToAssign: Podcast[], collectionId: string | null) => {
-    const updatedPodcasts = podcastsToAssign.map(p => ({...p, collectionId }));
     setPodcasts(prev => {
-        const existingIds = new Set(prev.map(p => p.id));
-        const uniqueNewPodcasts = updatedPodcasts.filter(p => !existingIds.has(p.id));
-        return [...prev, ...uniqueNewPodcasts];
+        const podcastMap = new Map(prev.map(p => [p.id, p]));
+        podcastsToAssign.forEach(p => {
+          podcastMap.set(p.id, { ...p, collectionId });
+        });
+        return Array.from(podcastMap.values());
     });
     setPodcastsToCategorize([]);
     setIsCategorizeModalOpen(false);
   }, [setPodcasts]);
+
 
   const handleFileUpload = useCallback((files: FileList, contextCollectionId: string | null = null) => {
     setIsLoading(true);
@@ -207,7 +212,9 @@ export default function App() {
         .map(res => res.value);
       
       if (successfulUploads.length > 0) {
-        if (contextCollectionId) {
+        if (!useCollectionsView) {
+            handleAssignToCollection(successfulUploads, null);
+        } else if (contextCollectionId) {
             const isUncategorized = contextCollectionId === 'uncategorized';
             const collection = isUncategorized ? null : collections.find(c => c.id === contextCollectionId);
             const collectionName = isUncategorized ? 'Uncategorized' : collection?.name;
@@ -215,18 +222,17 @@ export default function App() {
             if (collectionName && window.confirm(`Add ${successfulUploads.length} new audio file(s) to "${collectionName}"?`)) {
                 handleAssignToCollection(successfulUploads, isUncategorized ? null : contextCollectionId);
             } else {
-                // User canceled, fall back to categorize modal
                 setPodcastsToCategorize(successfulUploads);
                 setIsCategorizeModalOpen(true);
             }
-        } else { // This is for root upload
+        } else {
             setPodcastsToCategorize(successfulUploads);
             setIsCategorizeModalOpen(true);
         }
       }
       setIsLoading(false);
     });
-  }, [collections, handleAssignToCollection]);
+  }, [collections, handleAssignToCollection, useCollectionsView]);
   
   const handleCreateCollection = useCallback((name: string): string => {
     const newCollection: Collection = {
@@ -483,6 +489,7 @@ export default function App() {
       reviewModeEnabled,
       customArtwork,
       completionSound,
+      useCollectionsView,
     };
     
     const jsonString = JSON.stringify(dataToExport, null, 2);
@@ -496,7 +503,7 @@ export default function App() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [podcasts, collections, title, theme, streakData, hideCompleted, reviewModeEnabled, customArtwork, completionSound]);
+  }, [podcasts, collections, title, theme, streakData, hideCompleted, reviewModeEnabled, customArtwork, completionSound, useCollectionsView]);
 
   const handleImportData = useCallback((file: File, onSuccess?: () => void) => {
     if (!file) return;
@@ -523,6 +530,7 @@ export default function App() {
             if (typeof importedData.reviewModeEnabled === 'boolean') setReviewModeEnabled(importedData.reviewModeEnabled);
             if (importedData.customArtwork !== undefined) setCustomArtwork(importedData.customArtwork);
             if (importedData.completionSound) setCompletionSound(importedData.completionSound);
+            if (typeof importedData.useCollectionsView === 'boolean') setUseCollectionsView(importedData.useCollectionsView);
             
             // Merge podcast progress intelligently
             setPodcasts(currentPodcasts => {
@@ -554,7 +562,7 @@ export default function App() {
         alert('Failed to read the file.');
     };
     reader.readAsText(file);
-  }, [setPodcasts, setCollections, setTitle, setTheme, setStreakData, setHideCompleted, setReviewModeEnabled, setCustomArtwork, setCompletionSound]);
+  }, [setPodcasts, setCollections, setTitle, setTheme, setStreakData, setHideCompleted, setReviewModeEnabled, setCustomArtwork, setCompletionSound, setUseCollectionsView]);
 
   const currentPodcast = useMemo(() => 
     podcasts.find(p => p.id === currentPodcastId),
@@ -575,42 +583,49 @@ export default function App() {
   };
   
   const showApp = hasCompletedOnboarding && !isInitializing;
+  
+  const handleToggleCollectionsView = (enabled: boolean) => {
+    setUseCollectionsView(enabled);
+    if (!enabled) {
+        setCurrentView(null); // Go back to root view when disabling
+    }
+  };
 
   const currentCollection = useMemo(() => {
-    if (!currentView) return null;
+    if (!currentView || !useCollectionsView) return null;
     if (currentView === 'uncategorized') {
       return { id: 'uncategorized', name: 'Uncategorized' };
     }
     return collections.find(c => c.id === currentView);
-  }, [currentView, collections]);
+  }, [currentView, collections, useCollectionsView]);
   
-  const podcastsInCurrentView = useMemo(() => {
-    if (!currentView) return [];
-    
-    const targetCollectionId = currentView === 'uncategorized' ? null : currentView;
-    const collectionPodcasts = allPodcastsSorted.filter(p => p.collectionId === targetCollectionId);
+  const podcastsForListView = useMemo(() => {
+    const list = currentView 
+        ? allPodcastsSorted.filter(p => p.collectionId === (currentView === 'uncategorized' ? null : currentView))
+        : allPodcastsSorted;
 
     if (hideCompleted) {
-        return collectionPodcasts.filter(p => !p.isListened);
+        return list.filter(p => !p.isListened);
     }
-    const completed = collectionPodcasts.filter(p => p.isListened);
-    const inProgress = collectionPodcasts.filter(p => !p.isListened);
+    const completed = list.filter(p => p.isListened);
+    const inProgress = list.filter(p => !p.isListened);
     return [...inProgress, ...completed];
-
   }, [currentView, allPodcastsSorted, hideCompleted]);
 
   const firstUnplayedInView = useMemo(() => {
     if (!currentView) return null;
-    return podcastsInCurrentView.find(p => !p.isListened);
-  }, [podcastsInCurrentView, currentView]);
+    return podcastsForListView.find(p => !p.isListened);
+  }, [podcastsForListView, currentView]);
 
   const currentViewStats = useMemo(() => {
     if (!currentView) return { listenedCount: 0, totalCount: 0, percentage: 0 };
-    const listenedCount = podcastsInCurrentView.filter(p => p.isListened).length;
-    const totalCount = podcastsInCurrentView.length;
+    const listenedCount = podcastsForListView.filter(p => p.isListened).length;
+    const totalCount = podcastsForListView.length;
     const percentage = totalCount > 0 ? (listenedCount / totalCount) * 100 : 0;
     return { listenedCount, totalCount, percentage };
-  }, [podcastsInCurrentView]);
+  }, [podcastsForListView, currentView]);
+  
+  const isRootView = useCollectionsView && currentView === null;
 
   return (
     <div className="text-brand-text min-h-screen">
@@ -626,8 +641,8 @@ export default function App() {
       <div className={`transition-all duration-300 ${isPlayerExpanded || !showApp ? 'opacity-0 invisible' : 'opacity-100 visible'} ${!hasCompletedOnboarding ? 'blur-sm' : ''}`}>
         <header className="p-4 sm:p-6 md:p-8">
           <div className="max-w-4xl mx-auto">
-            {currentView === null ? (
-              // Root View Header
+            {!currentCollection ? (
+              // Root View or Simple List View Header
               <div
                 className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
                 style={{ animationDelay: '100ms' }}
@@ -664,17 +679,16 @@ export default function App() {
                 </div>
 
                 <div className="flex items-center gap-2 sm:gap-4 self-end sm:self-auto">
-                   <button
-                      onClick={() => {
-                        const name = prompt("Enter new collection name:");
-                        if (name && name.trim()) handleCreateCollection(name);
-                      }}
-                      className="flex items-center justify-center bg-brand-surface text-brand-text rounded-full hover:bg-brand-surface-light transition-all duration-300 p-2 sm:py-2 sm:px-4 b-border b-shadow b-shadow-hover transform hover:scale-105 active:scale-95"
-                      aria-label="Create new collection"
-                    >
-                      <FolderIcon size={20} />
-                      <span className="hidden sm:inline ml-2 font-bold">New Collection</span>
-                    </button>
+                   {useCollectionsView && (
+                    <button
+                        onClick={() => setIsCreateCollectionModalOpen(true)}
+                        className="flex items-center justify-center bg-brand-surface text-brand-text rounded-full hover:bg-brand-surface-light transition-all duration-300 p-2 sm:py-2 sm:px-4 b-border b-shadow b-shadow-hover transform hover:scale-105 active:scale-95"
+                        aria-label="Create new collection"
+                      >
+                        <FolderIcon size={20} />
+                        <span className="hidden sm:inline ml-2 font-bold">New Collection</span>
+                      </button>
+                   )}
                   <FileUpload onFileUpload={handleFileUpload} isLoading={isLoading} />
                    <button
                       onClick={() => setIsSettingsOpen(true)}
@@ -703,7 +717,7 @@ export default function App() {
               </div>
             )}
             
-            {podcasts.length > 0 && currentView === null && (
+            {podcasts.length > 0 && (!useCollectionsView || currentView === null) && (
               <div
                 className={`${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
                 style={{ animationDelay: '200ms' }}
@@ -715,78 +729,100 @@ export default function App() {
                 />
               </div>
             )}
-          </div>
-        </header>
-
-        <main className="p-4 sm:p-6 md:p-8 pt-0">
-          <div className="max-w-4xl mx-auto">
-            {showStreakTracker && currentView === null && (
+            {showStreakTracker && (!useCollectionsView || currentView === null) && (
               <div
-                className={`mb-6 ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                className={`mt-4 ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
                 style={{ animationDelay: '300ms' }}
               >
                 <StreakTracker streakData={streakData} isTodayComplete={isTodayComplete} />
               </div>
             )}
+          </div>
+        </header>
+
+        <main className="p-4 sm:p-6 md:p-8 pt-0">
+          <div className="max-w-4xl mx-auto">
             {podcasts.length > 0 || collections.length > 0 ? (
-                currentView === null ? (
-                    <div
-                      className={`${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
-                      style={{ animationDelay: showStreakTracker ? '400ms' : '300ms' }}
-                    >
-                      <CollectionList 
-                        collections={collections}
-                        podcasts={podcasts}
-                        onNavigateToCollection={setCurrentView}
-                        onPlayCollection={handlePlayCollection}
-                        onRenameCollection={handleRenameCollection}
-                        onDeleteCollection={handleDeleteCollection}
-                      />
-                    </div>
-                ) : (
-                    <>
-                      {firstUnplayedInView && (
+                useCollectionsView ? (
+                    isRootView ? (
                         <div
-                          className={`mb-6 ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
-                          style={{ animationDelay: '100ms' }}
+                          className={`${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                          style={{ animationDelay: showStreakTracker ? '400ms' : '300ms' }}
                         >
-                          <button
-                            onClick={() => handlePlayCollection(currentView === 'uncategorized' ? null : currentView)}
-                            className="w-full flex items-center justify-center gap-3 text-lg font-bold bg-brand-primary text-brand-text-on-primary rounded-lg p-4 b-border b-shadow b-shadow-hover transition-transform transform hover:scale-[1.02] active:scale-[0.98]"
-                            aria-label="Continue learning this collection"
-                          >
-                            <PlayIcon size={24} />
-                            <span>Continue Learning</span>
-                          </button>
+                          <CollectionList 
+                            collections={collections}
+                            podcasts={podcasts}
+                            onNavigateToCollection={setCurrentView}
+                            onPlayCollection={handlePlayCollection}
+                            onRenameCollection={handleRenameCollection}
+                            onDeleteCollection={handleDeleteCollection}
+                          />
                         </div>
-                      )}
-                     <div 
-                        className={`bg-brand-surface rounded-lg overflow-hidden shadow-lg b-border b-shadow ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
-                        style={{ animationDelay: firstUnplayedInView ? '200ms' : '100ms' }}
-                    >
-                        {podcastsInCurrentView.length > 0 && (
-                          <div className="p-4 border-b border-brand-surface">
-                              <StatusBar 
-                                  listenedCount={currentViewStats.listenedCount}
-                                  totalCount={currentViewStats.totalCount}
-                                  percentage={currentViewStats.percentage}
-                              />
+                    ) : (
+                      <>
+                        {firstUnplayedInView && (
+                          <div
+                            className={`mb-6 ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                            style={{ animationDelay: '100ms' }}
+                          >
+                            <button
+                              onClick={() => handlePlayCollection(currentView === 'uncategorized' ? null : currentView)}
+                              className="w-full flex items-center justify-center gap-3 text-lg font-bold bg-brand-primary text-brand-text-on-primary rounded-lg p-4 b-border b-shadow b-shadow-hover transition-transform transform hover:scale-[1.02] active:scale-[0.98]"
+                              aria-label="Continue learning this collection"
+                            >
+                              <PlayIcon size={24} />
+                              <span>Continue Learning</span>
+                            </button>
                           </div>
                         )}
-                        <PodcastList
-                            podcasts={podcastsInCurrentView}
-                            collections={collections}
-                            currentPodcastId={currentPodcastId}
-                            isPlaying={isPlaying}
-                            onSelectPodcast={handleSelectPodcast}
-                            onDeletePodcast={handleDeletePodcast}
-                            onTogglePodcastComplete={handleToggleComplete}
-                            onMovePodcastToCollection={handleMovePodcastToCollection}
-                            hideCompleted={hideCompleted}
-                            activePlayerTime={activePlayerTime}
-                        />
-                    </div>
-                  </>
+                       <div 
+                          className={`bg-brand-surface rounded-lg overflow-hidden shadow-lg b-border b-shadow ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                          style={{ animationDelay: firstUnplayedInView ? '200ms' : '100ms' }}
+                      >
+                          {podcastsForListView.length > 0 && (
+                            <div className="p-4 border-b border-brand-surface">
+                                <StatusBar 
+                                    listenedCount={currentViewStats.listenedCount}
+                                    totalCount={currentViewStats.totalCount}
+                                    percentage={currentViewStats.percentage}
+                                />
+                            </div>
+                          )}
+                          <PodcastList
+                              podcasts={podcastsForListView}
+                              collections={collections}
+                              currentPodcastId={currentPodcastId}
+                              isPlaying={isPlaying}
+                              onSelectPodcast={handleSelectPodcast}
+                              onDeletePodcast={handleDeletePodcast}
+                              onTogglePodcastComplete={handleToggleComplete}
+                              onMovePodcastToCollection={handleMovePodcastToCollection}
+                              hideCompleted={hideCompleted}
+                              activePlayerTime={activePlayerTime}
+                              useCollectionsView={useCollectionsView}
+                          />
+                      </div>
+                    </>
+                    )
+                ) : (
+                  <div 
+                      className={`bg-brand-surface rounded-lg overflow-hidden shadow-lg b-border b-shadow ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                      style={{ animationDelay: '300ms' }}
+                  >
+                      <PodcastList
+                          podcasts={podcastsForListView}
+                          collections={collections}
+                          currentPodcastId={currentPodcastId}
+                          isPlaying={isPlaying}
+                          onSelectPodcast={handleSelectPodcast}
+                          onDeletePodcast={handleDeletePodcast}
+                          onTogglePodcastComplete={handleToggleComplete}
+                          onMovePodcastToCollection={handleMovePodcastToCollection}
+                          hideCompleted={hideCompleted}
+                          activePlayerTime={activePlayerTime}
+                          useCollectionsView={useCollectionsView}
+                      />
+                  </div>
                 )
             ) : (
               <div
@@ -839,6 +875,8 @@ export default function App() {
         onImportData={(file) => handleImportData(file, () => setIsSettingsOpen(false))}
         completionSound={completionSound}
         onSetCompletionSound={setCompletionSound}
+        useCollectionsView={useCollectionsView}
+        onSetUseCollectionsView={handleToggleCollectionsView}
       />
       
       <ReviewModal
@@ -858,6 +896,12 @@ export default function App() {
           handleAssignToCollection(podcastsToCategorize, newId);
         }}
         onAssign={(collectionId) => handleAssignToCollection(podcastsToCategorize, collectionId)}
+      />
+
+      <CreateCollectionModal
+        isOpen={isCreateCollectionModalOpen}
+        onClose={() => setIsCreateCollectionModalOpen(false)}
+        onCreate={handleCreateCollection}
       />
     </div>
   );
