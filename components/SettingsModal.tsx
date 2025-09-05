@@ -21,7 +21,7 @@ interface SettingsModalProps {
   reviewModeEnabled: boolean;
   onSetReviewModeEnabled: (value: boolean) => void;
   customArtwork: string | null;
-  onSetCustomArtwork: (artwork: string | null) => void;
+  onSetCustomArtwork: (file: File | null) => void;
   onExportData: () => void;
   onImportData: (file: File) => void;
   completionSound: CompletionSound;
@@ -115,18 +115,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         return;
     }
 
-    if (file.size > 1024 * 1024) { // 1MB limit
-        alert('Please select an image smaller than 1MB.');
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        alert('Please select an image smaller than 10MB.');
         return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        if (e.target?.result) {
-            onSetCustomArtwork(e.target.result as string);
-        }
-    };
-    reader.readAsDataURL(file);
+    onSetCustomArtwork(file);
 
     if(event.target) {
         event.target.value = '';

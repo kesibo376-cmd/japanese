@@ -4,7 +4,7 @@ import type { Podcast, StreakData, Theme, CompletionSound, Collection } from './
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useTheme } from './hooks/useTheme';
 import { useStreak } from './hooks/useStreak';
-import { savePodcastToDB, clearPodcastsInDB, deletePodcastFromDB } from './lib/db';
+import { savePodcastToDB, clearPodcastsInDB, deletePodcastFromDB, getPodcastFromDB, getArtworkFromDB, saveArtworkToDB, deleteArtworkFromDB } from './lib/db';
 import FileUpload from './components/FileUpload';
 import CollectionList from './components/CollectionList';
 import Player from './components/Player';
@@ -60,7 +60,8 @@ export default function App() {
   const [reviewModeEnabled, setReviewModeEnabled] = useLocalStorage<boolean>('reviewModeEnabled', false);
   const [reviewPrompt, setReviewPrompt] = useState<{ show: boolean; podcastToReview: Podcast | null; podcastToPlay: Podcast | null }>({ show: false, podcastToReview: null, podcastToPlay: null });
   const [nextPodcastOnEnd, setNextPodcastOnEnd] = useState<string | null>(null);
-  const [customArtwork, setCustomArtwork] = useLocalStorage<string | null>('customArtwork', null);
+  const [customArtwork, setCustomArtwork] = useState<string | null>(null);
+  const artworkObjectUrlRef = useRef<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [playbackRate, setPlaybackRate] = useLocalStorage<number>('playbackRate', 1);
@@ -81,6 +82,66 @@ export default function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Effect to load custom artwork from DB on initial app load
+  useEffect(() => {
+    const loadArtwork = async () => {
+        try {
+            const artworkFile = await getArtworkFromDB();
+            if (artworkFile) {
+                const url = URL.createObjectURL(artworkFile);
+                artworkObjectUrlRef.current = url;
+                setCustomArtwork(url);
+            }
+        } catch (error) {
+            console.error("Failed to load custom artwork from DB.", error);
+        }
+    };
+    loadArtwork();
+
+    // Cleanup on unmount
+    return () => {
+        if (artworkObjectUrlRef.current) {
+            URL.revokeObjectURL(artworkObjectUrlRef.current);
+        }
+    };
+  }, []);
+
+  // Effect to migrate podcasts to include file size for storage management display
+  useEffect(() => {
+    const migratePodcastSizes = async () => {
+      // Find podcasts stored in IndexedDB that don't have the size property yet
+      const podcastsToMigrate = podcasts.filter(p => p.storage === 'indexeddb' && typeof p.size !== 'number');
+      if (podcastsToMigrate.length === 0) return;
+
+      console.log(`Migrating size information for ${podcastsToMigrate.length} podcasts...`);
+
+      const updates = await Promise.all(podcastsToMigrate.map(async p => {
+        try {
+          const file = await getPodcastFromDB(p.id);
+          return { id: p.id, size: file?.size ?? 0 };
+        } catch (e) {
+          console.error(`Could not get file for size migration: ${p.id}`, e);
+          return { id: p.id, size: 0 };
+        }
+      }));
+      
+      setPodcasts(currentPodcasts => {
+        const updatesMap = new Map(updates.map(u => [u.id, u.size]));
+        return currentPodcasts.map(p => {
+          if (updatesMap.has(p.id)) {
+            // Create a new object to ensure react state update
+            return { ...p, size: updatesMap.get(p.id) };
+          }
+          return p;
+        });
+      });
+    };
+
+    // Run migration shortly after app loads to not block initial render
+    const migrationTimeout = setTimeout(migratePodcastSizes, 1000);
+    return () => clearTimeout(migrationTimeout);
+  }, []); // Intentionally empty to run once on mount
+
   // Effect to load pre-defined podcasts from the public folder on initial app load
   useEffect(() => {
     const loadPodcastFromUrl = (url: string): Promise<Podcast | null> => {
@@ -99,6 +160,7 @@ export default function App() {
             isListened: false,
             storage: 'preloaded',
             collectionId: null,
+            size: 0, // Size is unknown for preloaded files without fetching
           });
         };
         audio.onerror = () => {
@@ -156,6 +218,33 @@ export default function App() {
       titleInputRef.current?.select();
     }
   }, [isEditingTitle]);
+  
+  const handleSetCustomArtwork = async (file: File | null) => {
+    // Revoke previous object URL if it exists
+    if (artworkObjectUrlRef.current) {
+        URL.revokeObjectURL(artworkObjectUrlRef.current);
+        artworkObjectUrlRef.current = null;
+    }
+
+    if (file) { // Setting a new artwork
+        try {
+            await saveArtworkToDB(file);
+            const url = URL.createObjectURL(file);
+            artworkObjectUrlRef.current = url;
+            setCustomArtwork(url);
+        } catch (error) {
+            console.error("Failed to save artwork:", error);
+            alert('There was an error saving the artwork. It might be too large.');
+        }
+    } else { // Removing the artwork
+        try {
+            await deleteArtworkFromDB();
+            setCustomArtwork(null);
+        } catch (error) {
+            console.error("Failed to delete artwork:", error);
+        }
+    }
+  };
 
   const handleAssignToCollection = useCallback((podcastsToAssign: Podcast[], collectionId: string | null) => {
     setPodcasts(prev => {
@@ -190,6 +279,7 @@ export default function App() {
               isListened: false,
               storage: 'indexeddb',
               collectionId: null,
+              size: file.size, // Store file size
             };
             URL.revokeObjectURL(tempAudioUrl);
             resolve(newPodcast);
@@ -496,7 +586,6 @@ export default function App() {
       streakData,
       hideCompleted,
       reviewModeEnabled,
-      customArtwork,
       completionSound,
       useCollectionsView,
       playOnNavigate,
@@ -513,7 +602,7 @@ export default function App() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [podcasts, collections, title, theme, streakData, hideCompleted, reviewModeEnabled, customArtwork, completionSound, useCollectionsView, playOnNavigate]);
+  }, [podcasts, collections, title, theme, streakData, hideCompleted, reviewModeEnabled, completionSound, useCollectionsView, playOnNavigate]);
 
   const handleImportData = useCallback((file: File, onSuccess?: () => void) => {
     if (!file) return;
@@ -538,7 +627,6 @@ export default function App() {
             if (importedData.streakData) setStreakData(importedData.streakData);
             if (typeof importedData.hideCompleted === 'boolean') setHideCompleted(importedData.hideCompleted);
             if (typeof importedData.reviewModeEnabled === 'boolean') setReviewModeEnabled(importedData.reviewModeEnabled);
-            if (importedData.customArtwork !== undefined) setCustomArtwork(importedData.customArtwork);
             if (importedData.completionSound) setCompletionSound(importedData.completionSound);
             if (typeof importedData.useCollectionsView === 'boolean') setUseCollectionsView(importedData.useCollectionsView);
             if (typeof importedData.playOnNavigate === 'boolean') setPlayOnNavigate(importedData.playOnNavigate);
@@ -556,6 +644,7 @@ export default function App() {
                             progress: importedPodcast.progress || 0,
                             isListened: importedPodcast.isListened || false,
                             collectionId: importedPodcast.collectionId || null,
+                            // Don't import size, it will be migrated from actual file data
                         };
                     }
                     return currentPodcast;
@@ -574,7 +663,7 @@ export default function App() {
         alert('Failed to read the file.');
     };
     reader.readAsText(file);
-  }, [setPodcasts, setCollections, setTitle, setTheme, setStreakData, setHideCompleted, setReviewModeEnabled, setCustomArtwork, setCompletionSound, setUseCollectionsView, setPlayOnNavigate]);
+  }, [setPodcasts, setCollections, setTitle, setTheme, setStreakData, setHideCompleted, setReviewModeEnabled, setCompletionSound, setUseCollectionsView, setPlayOnNavigate]);
 
   const currentPodcast = useMemo(() => 
     podcasts.find(p => p.id === currentPodcastId),
@@ -586,6 +675,10 @@ export default function App() {
     const totalCount = podcasts.length;
     const percentage = totalCount > 0 ? (listenedCount / totalCount) * 100 : 0;
     return { listenedCount, totalCount, percentage };
+  }, [podcasts]);
+
+  const totalStorageUsed = useMemo(() => {
+    return podcasts.reduce((acc, p) => acc + (p.size || 0), 0);
   }, [podcasts]);
 
   const showStreakTracker = streakData.enabled && podcasts.length > 0;
@@ -882,7 +975,7 @@ export default function App() {
         reviewModeEnabled={reviewModeEnabled}
         onSetReviewModeEnabled={setReviewModeEnabled}
         customArtwork={customArtwork}
-        onSetCustomArtwork={setCustomArtwork}
+        onSetCustomArtwork={handleSetCustomArtwork}
         onExportData={handleExportData}
         onImportData={(file) => handleImportData(file, () => setIsSettingsOpen(false))}
         completionSound={completionSound}
@@ -891,6 +984,7 @@ export default function App() {
         onSetUseCollectionsView={handleToggleCollectionsView}
         playOnNavigate={playOnNavigate}
         onSetPlayOnNavigate={setPlayOnNavigate}
+        totalStorageUsed={totalStorageUsed}
       />
       
       <ReviewModal

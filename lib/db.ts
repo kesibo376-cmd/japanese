@@ -119,3 +119,67 @@ export async function clearPodcastsInDB(): Promise<void> {
     };
   });
 }
+
+const ARTWORK_KEY = 'custom-artwork';
+
+/**
+ * Saves the custom artwork file (File/Blob object) to IndexedDB.
+ * @param file The File object to be stored.
+ */
+export async function saveArtworkToDB(file: File): Promise<void> {
+  const dbInstance = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = dbInstance.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.put(file, ARTWORK_KEY); // Use fixed key
+
+    transaction.oncomplete = () => {
+      resolve();
+    };
+
+    transaction.onerror = () => {
+      reject(transaction.error);
+    };
+  });
+}
+
+/**
+ * Retrieves the custom artwork file from IndexedDB.
+ * @returns The File object if found, otherwise undefined.
+ */
+export async function getArtworkFromDB(): Promise<File | undefined> {
+  const dbInstance = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = dbInstance.transaction(STORE_NAME, 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.get(ARTWORK_KEY); // Use fixed key
+
+    request.onsuccess = () => {
+      resolve(request.result);
+    };
+
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
+}
+
+/**
+ * Deletes the custom artwork file from IndexedDB.
+ */
+export async function deleteArtworkFromDB(): Promise<void> {
+  const dbInstance = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = dbInstance.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.delete(ARTWORK_KEY); // Use fixed key
+
+    transaction.oncomplete = () => {
+      resolve();
+    };
+
+    transaction.onerror = () => {
+      reject(transaction.error);
+    };
+  });
+}
