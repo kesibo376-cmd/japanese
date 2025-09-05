@@ -190,16 +190,16 @@ const Player: React.FC<PlayerProps> = ({
 
   const sharedControls = (size: 'small' | 'large') => (
     <div className={`flex items-center justify-center gap-${size === 'large' ? '4 sm:gap-8' : '2'}`}>
-      <button onClick={() => handleSkip(-5)} className="text-brand-text-secondary hover:text-brand-text p-2 rounded-full text-sm">
+      <button onClick={() => handleSkip(-5)} className="text-brand-text-secondary hover:text-brand-text p-2 rounded-full text-sm transform transition-transform hover:scale-110 active:scale-95">
           -5s
       </button>
       <button
         onClick={() => setIsPlaying(!isPlaying)}
-        className={`bg-brand-primary text-brand-text-on-primary rounded-full hover:bg-brand-primary-hover transition-transform transform hover:scale-105 ${size === 'large' ? 'p-5' : 'p-3'} b-border b-shadow b-shadow-hover`}
+        className={`bg-brand-primary text-brand-text-on-primary rounded-full hover:bg-brand-primary-hover transition-transform transform hover:scale-105 active:scale-95 ${size === 'large' ? 'p-5' : 'p-3'} b-border b-shadow b-shadow-hover`}
       >
       {isPlaying ? <PauseIcon size={size === 'large' ? 32 : 16} /> : <PlayIcon size={size === 'large' ? 32 : 16} />}
       </button>
-      <button onClick={() => handleSkip(5)} className="text-brand-text-secondary hover:text-brand-text p-2 rounded-full text-sm">
+      <button onClick={() => handleSkip(5)} className="text-brand-text-secondary hover:text-brand-text p-2 rounded-full text-sm transform transition-transform hover:scale-110 active:scale-95">
           +5s
       </button>
     </div>
@@ -242,7 +242,7 @@ const Player: React.FC<PlayerProps> = ({
             </button>
           </div>
           <div className="flex-grow flex flex-col items-center justify-center text-center gap-6 sm:gap-8">
-            <div className="w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-brand-surface rounded-lg shadow-2xl overflow-hidden b-border b-shadow">
+            <div className={`w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 bg-brand-surface rounded-lg shadow-2xl overflow-hidden b-border b-shadow transition-transform ${isPlaying ? 'animate-pulse-slow' : ''}`}>
               <img
                 src={artworkUrl || "https://www.visithasselt.be/sites/visithasselt/files/styles/teaser_cover/public/2025-02/iedereen-verdient-vakantie.jpg.jpg?h=38395a2e&itok=iRMrimgV"}
                 alt={`Artwork for ${podcast.name}`}
@@ -275,7 +275,7 @@ const Player: React.FC<PlayerProps> = ({
             <div className="flex-shrink-0 flex items-center gap-2">
                <button 
                 onClick={(e) => { e.stopPropagation(); setIsPlaying(!isPlaying); }} 
-                className="text-brand-text p-2 rounded-full hover:bg-brand-surface b-border"
+                className="text-brand-text p-2 rounded-full hover:bg-brand-surface b-border transform transition-transform active:scale-90"
                 aria-label={isPlaying ? "Pause" : "Play"}
               >
                 {isPlaying ? <PauseIcon size={24} /> : <PlayIcon size={24} />}

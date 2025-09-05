@@ -421,7 +421,7 @@ export default function App() {
                 <FileUpload onFileUpload={handleFileUpload} isLoading={isLoading} />
                  <button
                     onClick={() => setIsSettingsOpen(true)}
-                    className="p-2 text-brand-text-secondary hover:text-brand-text rounded-full transition-colors duration-200"
+                    className="p-2 text-brand-text-secondary hover:text-brand-text rounded-full transition-colors duration-200 group"
                     aria-label="Open settings"
                   >
                     <SettingsIcon size={24} />

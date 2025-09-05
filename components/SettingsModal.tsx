@@ -53,8 +53,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 }) => {
   const artworkInputRef = useRef<HTMLInputElement>(null);
 
-  if (!isOpen) return null;
-
   const handleResetClick = () => {
     onResetProgress();
     onClose();
@@ -105,14 +103,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-75 z-40 overflow-y-auto p-4"
+      className={`fixed inset-0 bg-black z-40 p-4 transition-opacity duration-300 ease-in-out ${isOpen ? 'bg-opacity-75' : 'bg-opacity-0 pointer-events-none'}`}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="settings-title"
+      aria-hidden={!isOpen}
     >
       <div 
-        className="bg-brand-surface rounded-lg shadow-2xl p-6 w-full max-w-sm b-border b-shadow mx-auto my-8"
+        className={`bg-brand-surface rounded-lg shadow-2xl p-6 w-full max-w-sm b-border b-shadow mx-auto my-8 transition-all duration-300 ease-in-out ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
@@ -120,7 +119,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           <button onClick={onClose} aria-label="Close settings" className="text-brand-text-secondary hover:text-brand-text text-3xl leading-none">&times;</button>
         </div>
         
-        <div className="space-y-6">
+        <div className="space-y-6 max-h-[80vh] overflow-y-auto pr-2 -mr-2">
           <div>
             <h3 className="text-lg font-semibold text-brand-text mb-3">Appearance</h3>
             <div className="space-y-2">
@@ -129,7 +128,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   key={theme.id}
                   onClick={() => onSetTheme(theme.id)}
                   className={`w-full text-left p-3 rounded-md transition-colors duration-200 flex items-center justify-between b-border ${
-                    currentTheme === theme.id ? 'bg-brand-primary text-white' : 'bg-brand-surface-light hover:bg-opacity-75'
+                    currentTheme === theme.id ? 'bg-brand-primary text-brand-text-on-primary' : 'bg-brand-surface-light hover:bg-opacity-75'
                   }`}
                 >
                   <span>{theme.name}</span>
@@ -194,7 +193,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                 key={d.id}
                                 onClick={() => handleDifficultyChange(d.id)}
                                 className={`w-full text-left p-2 rounded-md transition-colors duration-200 flex items-center justify-between text-sm b-border ${
-                                    streakData.difficulty === d.id ? 'bg-brand-primary text-white' : 'bg-brand-surface hover:bg-opacity-75'
+                                    streakData.difficulty === d.id ? 'bg-brand-primary text-brand-text-on-primary' : 'bg-brand-surface hover:bg-opacity-75'
                                 }`}
                             >
                                 <div>

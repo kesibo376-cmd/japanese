@@ -11,11 +11,24 @@ interface PodcastItemProps {
   isActive: boolean;
   isPlaying: boolean;
   onSelect: (id: string) => void;
-  onDelete: (id: string) => void;
+  onDeleteRequest: (id: string) => void;
   onToggleComplete: (id: string) => void;
+  onAnimationEnd: () => void;
+  isDeleting: boolean;
+  style: React.CSSProperties;
 }
 
-const PodcastItem: React.FC<PodcastItemProps> = ({ podcast, isActive, isPlaying, onSelect, onDelete, onToggleComplete }) => {
+const PodcastItem: React.FC<PodcastItemProps> = ({ 
+  podcast, 
+  isActive, 
+  isPlaying, 
+  onSelect, 
+  onDeleteRequest, 
+  onToggleComplete,
+  onAnimationEnd,
+  isDeleting,
+  style,
+}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   
@@ -49,13 +62,19 @@ const PodcastItem: React.FC<PodcastItemProps> = ({ podcast, isActive, isPlaying,
   return (
     <div
       onClick={() => onSelect(podcast.id)}
-      className={`p-4 flex items-center gap-4 border-b border-brand-surface cursor-pointer transition-colors duration-200 relative ${
-        isActive ? 'bg-brand-surface-light' : 'hover:bg-brand-surface'
-      } ${isCompleted && !isActive ? 'opacity-60' : ''}`}
+      onAnimationEnd={onAnimationEnd}
+      style={style}
+      className={`p-4 flex items-center gap-4 border-b border-brand-surface cursor-pointer transition-all duration-200 relative transform origin-center
+        ${isActive ? 'bg-brand-surface-light' : 'hover:bg-brand-surface hover:-translate-y-0.5'}
+        ${isCompleted && !isActive ? 'opacity-60' : ''}
+        ${isDeleting ? 'animate-shrink-out' : 'animate-slide-up-fade-in'}
+      `}
     >
       <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
         {isCompleted && !isActive ? (
-          <CheckIcon size={24} color="text-brand-primary" />
+          <div className="animate-scale-in">
+            <CheckIcon size={24} color="text-brand-primary" />
+          </div>
         ) : isActive ? (
           isPlaying ? <PauseIcon size={24} color="text-brand-primary" /> : <PlayIcon size={24} color="text-brand-primary" />
         ) : (
@@ -79,7 +98,7 @@ const PodcastItem: React.FC<PodcastItemProps> = ({ podcast, isActive, isPlaying,
             <ThreeDotsIcon size={20} />
           </button>
           {isMenuOpen && (
-              <div className="absolute right-4 top-12 mt-1 w-48 bg-brand-surface-light rounded-md shadow-lg z-50 b-border">
+              <div className="absolute right-4 top-12 mt-1 w-48 bg-brand-surface-light rounded-md shadow-lg z-50 b-border animate-scale-in origin-top-right">
                   <ul className="py-1">
                       <li>
                           <button 
@@ -91,11 +110,7 @@ const PodcastItem: React.FC<PodcastItemProps> = ({ podcast, isActive, isPlaying,
                       </li>
                       <li>
                            <button 
-                            onClick={(e) => handleAction(e, () => {
-                                if (window.confirm(`Are you sure you want to delete "${podcast.name}"?`)) {
-                                    onDelete(podcast.id);
-                                }
-                            })}
+                            onClick={(e) => handleAction(e, () => onDeleteRequest(podcast.id))}
                             className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-brand-surface"
                           >
                             Delete
