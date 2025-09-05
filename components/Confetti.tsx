@@ -23,8 +23,12 @@ const THEME_CONFIG: Record<Theme, { colors: string[]; shapes: ('rect' | 'pixel')
     colors: ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#000000'],
     shapes: ['pixel'],
   },
-  glass: {
-    colors: ['#0A84FF', '#3399FF', '#FFFFFF', 'rgba(235, 235, 245, 0.6)'],
+  minimal: {
+    colors: ['#007aff', '#6e6e73', '#f2f2f7'],
+    shapes: ['rect'],
+  },
+  'hand-drawn': {
+    colors: ['#0057b8', '#3a3a3a', '#707070'],
     shapes: ['rect'],
   }
 };
