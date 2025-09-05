@@ -26,10 +26,10 @@
       }
       [data-theme="minecraft"] {
         --font-sans: 'VT323', monospace;
-        --brand-bg: #593D29; /* Dirt color for fallback */
+        --brand-bg: #5E3A1E; /* Dirt color for fallback */
         --brand-surface: #C6C6C6; /* Stone Grey UI panel */
         --brand-surface-light: #DDDDDD;
-        --brand-primary: #55ACEE; /* This will be the ACCENT color */
+        --brand-primary: #55ACEE; /* Diamond Blue */
         --brand-primary-hover: #77BEEE;
         --brand-text: #FFFFFF;
         --brand-text-secondary: #AAAAAA;
@@ -45,10 +45,10 @@
         --mc-border-dark: #373737;
         --mc-border-light: #FFFFFF;
         --mc-text-shadow: 2px 2px #373737;
-        --mc-progress-bar: #55FF55;
+        --mc-progress-bar: #AAAAAA;
 
         cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAWCAYAAAAVLa4NAAAAAXNSR0IArs4c6QAAABxpVGlTCQ8AAAAADUlNSUgAAABVAAAAFoLe204AAABzSURBVDhPzZNbDoAgDER9W/yP5K8eKE1gC30Yh14WWpYlSz18gB/gZ2cYYwAP5WpUorisX/d1/sQDOHWeYcV2DjV2AY7e5AUkAVdAVoA2QBvYBSgDPgEnwAU4AlvAGrABboBfwCfwD7AE3gG3gD5gD5yBfcAX8AS+AY+Bf/8/wAmAInBGBg/5AAAAAElFTSuQmCC") 10 10, auto;
-        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAKtJREFUOE9jZMAC/geI/wDxQyA+B+L/jAwsDMz/gfgfED8A8T8gfgPE/wHxZyA+AMQnQfwPiA8D8S9QX/6vAuL/UPwfiv9D8X8o/Q/F/6H4Pyj9D8X/ofg/FP+H0v9B9T8o/w/F/2H1P0jxPyj9D8X/ofg/FP+H4v/Q/B+K/wPxIFA/IPr/UPwfi//D+H8A8X8ofg/F/6H4P5T+BwAAmL1e/VX3A7sAAAAASUVORK5CYII=');
+        background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAD9JREFUOE9jZKAQMOL5/38GBgYHBgYGEIZw//79/z/D/3//+c/w/8d/hv8+fmb47+M/w38f/xkGBgYAIN4f5d2kIYYAAAAASUVORK5CYII=');
         image-rendering: pixelated;
       }
       [data-theme="brutalist"] {
@@ -84,6 +84,7 @@
       }
       
       [data-theme="minimal"] {
+        --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         --brand-bg: #f9f9fb;
         --brand-surface: #ffffff;
@@ -188,12 +189,10 @@
          background-color: var(--mc-button-hover-bg) !important;
       }
       [data-theme="minecraft"] button:active, [data-theme="minecraft"] button.active {
-          border-color: var(--mc-border-dark) var(--mc-border-light) var(--mc-border-light) var(--mc-border-dark);
-      }
-      [data-theme="minecraft"] button.active {
-          background-color: var(--brand-primary) !important;
-          color: var(--brand-text-on-primary) !important;
-          text-shadow: var(--mc-text-shadow) !important;
+          border-color: var(--mc-border-dark) var(--mc-border-light) var(--mc-border-light) var(--mc-border-dark) !important;
+          background-color: #B0B0B0 !important;
+          color: var(--mc-button-text) !important;
+          text-shadow: none !important;
       }
       [data-theme="minecraft"] .text-red-500, [data-theme="minecraft"] .text-red-500:hover {
           color: #FF5555 !important;
@@ -246,9 +245,39 @@
         border-style: solid;
         border-color: #000;
         box-shadow: inset 0 0 0 2px var(--mc-border-dark), inset 0 0 0 4px #000;
-        padding: 16px;
+        padding: 0; /* Padding is handled by inner elements */
       }
-
+      
+      [data-theme="minecraft"] .onboarding-header {
+        padding: 16px;
+        text-align: center;
+        border-bottom: 2px solid var(--mc-border-dark);
+      }
+      [data-theme="minecraft"] .onboarding-content {
+        padding: 24px 16px;
+        flex-grow: 1;
+        overflow-y: auto;
+      }
+      [data-theme="minecraft"] .onboarding-footer {
+        padding: 16px;
+        border-top: 2px solid var(--mc-border-dark);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      [data-theme="minecraft"] .onboarding-skip-btn {
+        background: none !important;
+        border: none !important;
+        color: var(--brand-text-secondary) !important;
+        text-decoration: underline;
+        text-shadow: none !important;
+        font-size: 16px;
+      }
+      [data-theme="minecraft"] .onboarding-skip-btn:hover {
+        color: var(--brand-text) !important;
+      }
+      
       [data-theme="minecraft"] .modal-panel.onboarding h2,
       [data-theme="minecraft"] .modal-panel.onboarding h3 {
         color: var(--brand-text);
@@ -265,19 +294,6 @@
           background: #000;
           border: 2px solid var(--mc-border-dark);
           padding: 8px;
-      }
-      
-      [data-theme="minecraft"] .modal-panel.onboarding .border-t {
-        border-top-color: var(--mc-border-dark);
-      }
-
-      /* This more specific rule ensures the main action button uses the standard button style */
-      [data-theme="minecraft"] .modal-panel.onboarding .bg-brand-primary {
-          background-color: var(--mc-button-bg) !important;
-      }
-
-      [data-theme="minecraft"] .modal-panel.onboarding .bg-brand-primary:hover {
-          background-color: var(--mc-button-hover-bg) !important;
       }
 
       /* Brutalist & Retro Overrides */
@@ -443,7 +459,7 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/japanese/assets/index-Dus2Afn-.js"></script>
+  <script type="module" crossorigin src="/japanese/assets/index-yGsfXg40.js"></script>
 </head>
   <body class="bg-brand-bg font-sans">
     <div id="root"></div>
