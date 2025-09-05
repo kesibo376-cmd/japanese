@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import type { Podcast } from '../types';
+import type { Podcast, Collection } from '../types';
 import { formatTime } from '../lib/utils';
 import PlayIcon from './icons/PlayIcon';
 import PauseIcon from './icons/PauseIcon';
 import CheckIcon from './icons/CheckIcon';
 import ThreeDotsIcon from './icons/ThreeDotsIcon';
+import ChevronRightIcon from './icons/ChevronRightIcon';
 
 interface PodcastItemProps {
   podcast: Podcast;
@@ -13,6 +14,8 @@ interface PodcastItemProps {
   onSelect: (id: string) => void;
   onDeleteRequest: (id: string) => void;
   onToggleComplete: (id: string) => void;
+  onMoveRequest: (podcastId: string, newCollectionId: string | null) => void;
+  collections: Collection[];
   onAnimationEnd: () => void;
   isDeleting: boolean;
   style: React.CSSProperties;
@@ -26,12 +29,15 @@ const PodcastItem: React.FC<PodcastItemProps> = ({
   onSelect, 
   onDeleteRequest, 
   onToggleComplete,
+  onMoveRequest,
+  collections,
   onAnimationEnd,
   isDeleting,
   style,
   progressOverride,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMoveMenuOpen, setIsMoveMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   
   const isCompleted = podcast.isListened;
@@ -43,6 +49,7 @@ const PodcastItem: React.FC<PodcastItemProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsMenuOpen(false);
+        setIsMoveMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -54,12 +61,14 @@ const PodcastItem: React.FC<PodcastItemProps> = ({
   const handleMenuToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsMenuOpen(prev => !prev);
+    setIsMoveMenuOpen(false);
   }
   
   const handleAction = (e: React.MouseEvent, action: () => void) => {
     e.stopPropagation();
     action();
     setIsMenuOpen(false);
+    setIsMoveMenuOpen(false);
   }
 
   return (
@@ -111,6 +120,40 @@ const PodcastItem: React.FC<PodcastItemProps> = ({
                           >
                             {isCompleted ? 'Unmark as completed' : 'Mark as completed'}
                           </button>
+                      </li>
+                      <li className="relative">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setIsMoveMenuOpen(prev => !prev); }}
+                          className="w-full text-left px-4 py-2 text-sm text-brand-text hover:bg-brand-surface flex justify-between items-center"
+                        >
+                          Move to... <ChevronRightIcon size={16} className={`${isMoveMenuOpen ? 'rotate-180' : ''} transition-transform`}/>
+                        </button>
+                        {isMoveMenuOpen && (
+                            <div className="absolute right-full top-0 mr-1 w-48 bg-brand-surface-light rounded-md shadow-lg b-border">
+                                <ul className="py-1 max-h-48 overflow-y-auto">
+                                    <li>
+                                      <button 
+                                        onClick={(e) => handleAction(e, () => onMoveRequest(podcast.id, null))} 
+                                        className="w-full text-left px-4 py-2 text-sm text-brand-text hover:bg-brand-surface disabled:opacity-50"
+                                        disabled={podcast.collectionId === null}
+                                      >
+                                        Uncategorized
+                                      </button>
+                                    </li>
+                                    {collections.map(c => (
+                                        <li key={c.id}>
+                                            <button
+                                                onClick={(e) => handleAction(e, () => onMoveRequest(podcast.id, c.id))}
+                                                className="w-full text-left px-4 py-2 text-sm text-brand-text hover:bg-brand-surface disabled:opacity-50"
+                                                disabled={podcast.collectionId === c.id}
+                                            >
+                                                {c.name}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
                       </li>
                       <li>
                            <button 

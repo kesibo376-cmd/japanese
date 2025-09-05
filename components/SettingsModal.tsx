@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import type { Theme, StreakData, StreakDifficulty, CompletionSound } from '../types';
+import type { Theme, StreakData, StreakDifficulty, CompletionSound, Collection } from '../types';
 import ToggleSwitch from './ToggleSwitch';
 import ImageIcon from './icons/ImageIcon';
 import DownloadIcon from './icons/DownloadIcon';
@@ -80,7 +80,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   const handleDeleteClick = () => {
-    if (window.confirm('Are you sure you want to delete all audio files? This action cannot be undone.')) {
+    if (window.confirm('Are you sure you want to delete all audio files and collections? This action cannot be undone.')) {
       onDeleteAll();
       onClose();
     }
@@ -186,7 +186,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     ) : (
                     <div className="flex flex-col items-center text-brand-text-secondary">
                         <ImageIcon size={24} />
-                        <span className="text-xs text-center mt-1">No Artwork</span>
                     </div>
                     )}
                 </div>
@@ -216,13 +215,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
             <div className={`p-3 bg-brand-surface-light rounded-md b-border transition-opacity ${!streakData.enabled ? 'opacity-50 pointer-events-none' : ''}`}>
                 <p className="font-semibold mb-2">Streak Difficulty</p>
-                <div className="flex flex-col space-y-2">
+                <div className="flex flex-col space-y-2 streak-difficulty-options">
                     {DIFFICULTIES.map(d => (
                         <button
                             key={d.id}
                             onClick={() => handleDifficultyChange(d.id)}
                             disabled={!streakData.enabled}
-                            className={`w-full text-left p-2 rounded-md transition-colors duration-200 flex items-center justify-between text-sm b-border ${
+                            className={`w-full text-left px-2 py-3 rounded-md transition-colors duration-200 flex items-center justify-between text-sm b-border ${
                                 streakData.difficulty === d.id ? 'active' : 'bg-brand-surface hover:bg-opacity-75'
                             }`}
                         >

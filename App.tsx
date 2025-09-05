@@ -1,24 +1,31 @@
 
-
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import type { Podcast, StreakData, Theme, CompletionSound } from './types';
+import type { Podcast, StreakData, Theme, CompletionSound, Collection } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useTheme } from './hooks/useTheme';
 import { useStreak } from './hooks/useStreak';
 import { savePodcastToDB, clearPodcastsInDB, deletePodcastFromDB } from './lib/db';
 import FileUpload from './components/FileUpload';
-import PodcastList from './components/PodcastList';
+import CollectionList from './components/CollectionList';
 import Player from './components/Player';
 import StatusBar from './components/StatusBar';
 import SettingsIcon from './components/icons/SettingsIcon';
 import EditIcon from './components/icons/EditIcon';
+import FolderIcon from './components/icons/FolderIcon';
 import SettingsModal from './components/SettingsModal';
 import OnboardingModal from './components/OnboardingModal';
 import StreakTracker from './components/StreakTracker';
 import ReviewModal from './components/ReviewModal';
 import Confetti from './components/Confetti';
+import CategorizeModal from './components/CategorizeModal';
+import ChevronLeftIcon from './components/icons/ChevronLeftIcon';
+import PodcastList from './components/PodcastList';
+import PlayIcon from './components/icons/PlayIcon';
 
 const INITIAL_PODCASTS: Podcast[] = [];
+const DEFAULT_COLLECTIONS: Collection[] = [
+  { id: 'default-collection', name: 'My First Collection' }
+];
 
 // NOTE: As web applications cannot directly read your file system for security reasons,
 // you must list the audio files you place in the `/public/audio` folder here.
@@ -36,6 +43,7 @@ const COMPLETION_SOUND_URLS: Record<Exclude<CompletionSound, 'none'>, string> = 
 
 export default function App() {
   const [podcasts, setPodcasts] = useLocalStorage<Podcast[]>('podcasts', INITIAL_PODCASTS);
+  const [collections, setCollections] = useLocalStorage<Collection[]>('collections', DEFAULT_COLLECTIONS);
   const [title, setTitle] = useLocalStorage<string>('appTitle', '日本語コース');
   const [theme, setTheme] = useTheme();
   const { streakData, setStreakData, recordActivity, recordCompletion, unrecordCompletion, isTodayComplete } = useStreak();
@@ -58,6 +66,9 @@ export default function App() {
   const [activePlayerTime, setActivePlayerTime] = useState(0);
   const [completionSound, setCompletionSound] = useLocalStorage<CompletionSound>('completionSound', 'none');
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useLocalStorage<boolean>('hasCompletedOnboarding', false);
+  const [podcastsToCategorize, setPodcastsToCategorize] = useState<Podcast[]>([]);
+  const [isCategorizeModalOpen, setIsCategorizeModalOpen] = useState(false);
+  const [currentView, setCurrentView] = useState<string | null>(null); // null is root, collectionId, or 'uncategorized'
 
   // Effect for revealing animation on page load
   useEffect(() => {
@@ -82,6 +93,7 @@ export default function App() {
             progress: 0,
             isListened: false,
             storage: 'preloaded',
+            collectionId: null,
           });
         };
         audio.onerror = () => {
@@ -119,7 +131,7 @@ export default function App() {
 
   // Effect to lock body scroll when player is expanded or settings are open
   useEffect(() => {
-    const shouldLockScroll = isPlayerExpanded || isSettingsOpen || !hasCompletedOnboarding;
+    const shouldLockScroll = isPlayerExpanded || isSettingsOpen || !hasCompletedOnboarding || isCategorizeModalOpen;
     if (shouldLockScroll) {
       document.body.classList.add('overflow-hidden');
     } else {
@@ -130,7 +142,7 @@ export default function App() {
     return () => {
       document.body.classList.remove('overflow-hidden');
     };
-  }, [isPlayerExpanded, isSettingsOpen, hasCompletedOnboarding]);
+  }, [isPlayerExpanded, isSettingsOpen, hasCompletedOnboarding, isCategorizeModalOpen]);
 
   // Effect to focus the title input when editing starts
   useEffect(() => {
@@ -140,7 +152,18 @@ export default function App() {
     }
   }, [isEditingTitle]);
 
-  const handleFileUpload = useCallback((files: FileList) => {
+  const handleAssignToCollection = useCallback((podcastsToAssign: Podcast[], collectionId: string | null) => {
+    const updatedPodcasts = podcastsToAssign.map(p => ({...p, collectionId }));
+    setPodcasts(prev => {
+        const existingIds = new Set(prev.map(p => p.id));
+        const uniqueNewPodcasts = updatedPodcasts.filter(p => !existingIds.has(p.id));
+        return [...prev, ...uniqueNewPodcasts];
+    });
+    setPodcastsToCategorize([]);
+    setIsCategorizeModalOpen(false);
+  }, [setPodcasts]);
+
+  const handleFileUpload = useCallback((files: FileList, contextCollectionId: string | null = null) => {
     setIsLoading(true);
 
     const newPodcastPromises = Array.from(files).map(file => {
@@ -159,6 +182,7 @@ export default function App() {
               progress: 0,
               isListened: false,
               storage: 'indexeddb',
+              collectionId: null,
             };
             URL.revokeObjectURL(tempAudioUrl);
             resolve(newPodcast);
@@ -181,15 +205,52 @@ export default function App() {
       const successfulUploads = results
         .filter((res): res is PromiseFulfilledResult<Podcast> => res.status === 'fulfilled' && res.value !== null)
         .map(res => res.value);
+      
+      if (successfulUploads.length > 0) {
+        if (contextCollectionId) {
+            const isUncategorized = contextCollectionId === 'uncategorized';
+            const collection = isUncategorized ? null : collections.find(c => c.id === contextCollectionId);
+            const collectionName = isUncategorized ? 'Uncategorized' : collection?.name;
 
-      setPodcasts(prev => {
-        const existingIds = new Set(prev.map(p => p.id));
-        const uniqueNewPodcasts = successfulUploads.filter(p => !existingIds.has(p.id));
-        return [...prev, ...uniqueNewPodcasts];
-      });
-
+            if (collectionName && window.confirm(`Add ${successfulUploads.length} new audio file(s) to "${collectionName}"?`)) {
+                handleAssignToCollection(successfulUploads, isUncategorized ? null : contextCollectionId);
+            } else {
+                // User canceled, fall back to categorize modal
+                setPodcastsToCategorize(successfulUploads);
+                setIsCategorizeModalOpen(true);
+            }
+        } else { // This is for root upload
+            setPodcastsToCategorize(successfulUploads);
+            setIsCategorizeModalOpen(true);
+        }
+      }
       setIsLoading(false);
     });
+  }, [collections, handleAssignToCollection]);
+  
+  const handleCreateCollection = useCallback((name: string): string => {
+    const newCollection: Collection = {
+      id: `coll-${Date.now()}`,
+      name: name.trim(),
+    };
+    setCollections(prev => [...prev, newCollection]);
+    return newCollection.id;
+  }, [setCollections]);
+
+  const handleRenameCollection = useCallback((id: string, newName: string) => {
+    setCollections(prev => prev.map(c => c.id === id ? { ...c, name: newName.trim() } : c));
+  }, [setCollections]);
+
+  const handleDeleteCollection = useCallback((id: string) => {
+    setPodcasts(prev => prev.map(p => p.collectionId === id ? { ...p, collectionId: null } : p));
+    setCollections(prev => prev.filter(c => c.id !== id));
+    if (currentView === id) {
+      setCurrentView(null); // Go back to root if current collection is deleted
+    }
+  }, [setPodcasts, setCollections, currentView]);
+  
+  const handleMovePodcastToCollection = useCallback((podcastId: string, newCollectionId: string | null) => {
+    setPodcasts(prev => prev.map(p => p.id === podcastId ? { ...p, collectionId: newCollectionId } : p));
   }, [setPodcasts]);
 
   const updatePodcastProgress = useCallback((id: string, progress: number) => {
@@ -233,26 +294,12 @@ export default function App() {
     if (!isPlayerExpanded) setIsPlayerExpanded(true);
   }, [isPlayerExpanded, podcasts]);
 
-  const visiblePodcasts = useMemo(() => {
-    const internalSort = (a: Podcast, b: Podcast) => {
-      const numA = parseInt(a.name, 10);
-      const numB = parseInt(b.name, 10);
-      if (isNaN(numA) && isNaN(numB)) return a.name.localeCompare(b.name);
-      if (isNaN(numA)) return 1;
-      if (isNaN(numB)) return -1;
-      return numA - numB;
-    };
-
-    if (hideCompleted) {
-      return [...podcasts].filter(p => !p.isListened).sort(internalSort);
-    }
-
-    // When not hiding, group completed at the top, then sort each group.
-    const completed = [...podcasts].filter(p => p.isListened).sort(internalSort);
-    const inProgress = [...podcasts].filter(p => !p.isListened).sort(internalSort);
-    
-    return [...completed, ...inProgress];
-  }, [podcasts, hideCompleted]);
+  const allPodcastsSorted = useMemo(() => {
+      const internalSort = (a: Podcast, b: Podcast) => {
+        return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+      };
+      return [...podcasts].sort(internalSort);
+  }, [podcasts]);
 
   const handleSelectPodcast = (id: string) => {
     if (currentPodcastId === id) {
@@ -267,14 +314,16 @@ export default function App() {
       startPlayback(id);
       return;
     }
-
-    const currentIndex = visiblePodcasts.findIndex(p => p.id === id);
+    
+    // Note: Review mode logic may need adjustment with collections.
+    // This implementation checks the previous podcast in the flat sorted list.
+    const currentIndex = allPodcastsSorted.findIndex(p => p.id === id);
     if (currentIndex <= 0) {
       startPlayback(id);
       return;
     }
 
-    const podcastToReview = visiblePodcasts[currentIndex - 1];
+    const podcastToReview = allPodcastsSorted[currentIndex - 1];
     if (!podcastToReview.isListened) {
       startPlayback(id);
       return;
@@ -340,6 +389,20 @@ export default function App() {
     startPlayback(reviewPrompt.podcastToPlay.id);
     setReviewPrompt({ show: false, podcastToReview: null, podcastToPlay: null });
   };
+  
+  const handlePlayCollection = useCallback((collectionId: string | null) => {
+      const podcastsInCollection = allPodcastsSorted.filter(p => p.collectionId === collectionId);
+      const firstUnplayed = podcastsInCollection.find(p => !p.isListened);
+      
+      if (firstUnplayed) {
+        startPlayback(firstUnplayed.id);
+      } else {
+        // If all are played, maybe play the first one? For now, do nothing.
+        if (podcastsInCollection.length > 0) {
+           startPlayback(podcastsInCollection[0].id)
+        }
+      }
+    }, [allPodcastsSorted, startPlayback]);
 
   const handleResetProgress = useCallback(() => {
     setIsPlaying(false); // Stop playback for better UX
@@ -353,6 +416,7 @@ export default function App() {
     try {
         await clearPodcastsInDB();
         setPodcasts([]);
+        setCollections([]);
         setCurrentPodcastId(null);
         setIsPlaying(false);
         setIsPlayerExpanded(false);
@@ -360,7 +424,7 @@ export default function App() {
     } catch (error) {
         console.error("Failed to delete all audio files:", error);
     }
-  }, [setPodcasts, setStreakData]);
+  }, [setPodcasts, setCollections, setStreakData]);
 
   const handleDeletePodcast = useCallback(async (id: string) => {
     const podcastToDelete = podcasts.find(p => p.id === id);
@@ -411,6 +475,7 @@ export default function App() {
   const handleExportData = useCallback(() => {
     const dataToExport = {
       podcasts,
+      collections,
       appTitle: title,
       theme,
       streakData,
@@ -431,7 +496,7 @@ export default function App() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [podcasts, title, theme, streakData, hideCompleted, reviewModeEnabled, customArtwork, completionSound]);
+  }, [podcasts, collections, title, theme, streakData, hideCompleted, reviewModeEnabled, customArtwork, completionSound]);
 
   const handleImportData = useCallback((file: File, onSuccess?: () => void) => {
     if (!file) return;
@@ -450,6 +515,7 @@ export default function App() {
             }
             
             // Overwrite settings and other data
+            if (importedData.collections && Array.isArray(importedData.collections)) setCollections(importedData.collections);
             if (importedData.appTitle) setTitle(importedData.appTitle);
             if (importedData.theme) setTheme(importedData.theme);
             if (importedData.streakData) setStreakData(importedData.streakData);
@@ -460,8 +526,6 @@ export default function App() {
             
             // Merge podcast progress intelligently
             setPodcasts(currentPodcasts => {
-                // FIX: Explicitly type the Map to resolve errors where properties on `importedPodcast`
-                // were inaccessible because its type was inferred as `unknown`.
                 const importedPodcastsMap = new Map<string, Podcast>(importedData.podcasts.map((p: Podcast) => [p.id, p]));
                 
                 return currentPodcasts.map(currentPodcast => {
@@ -471,6 +535,7 @@ export default function App() {
                             ...currentPodcast,
                             progress: importedPodcast.progress || 0,
                             isListened: importedPodcast.isListened || false,
+                            collectionId: importedPodcast.collectionId || null,
                         };
                     }
                     return currentPodcast;
@@ -489,7 +554,7 @@ export default function App() {
         alert('Failed to read the file.');
     };
     reader.readAsText(file);
-  }, [setPodcasts, setTitle, setTheme, setStreakData, setHideCompleted, setReviewModeEnabled, setCustomArtwork, setCompletionSound]);
+  }, [setPodcasts, setCollections, setTitle, setTheme, setStreakData, setHideCompleted, setReviewModeEnabled, setCustomArtwork, setCompletionSound]);
 
   const currentPodcast = useMemo(() => 
     podcasts.find(p => p.id === currentPodcastId),
@@ -511,6 +576,42 @@ export default function App() {
   
   const showApp = hasCompletedOnboarding && !isInitializing;
 
+  const currentCollection = useMemo(() => {
+    if (!currentView) return null;
+    if (currentView === 'uncategorized') {
+      return { id: 'uncategorized', name: 'Uncategorized' };
+    }
+    return collections.find(c => c.id === currentView);
+  }, [currentView, collections]);
+  
+  const podcastsInCurrentView = useMemo(() => {
+    if (!currentView) return [];
+    
+    const targetCollectionId = currentView === 'uncategorized' ? null : currentView;
+    const collectionPodcasts = allPodcastsSorted.filter(p => p.collectionId === targetCollectionId);
+
+    if (hideCompleted) {
+        return collectionPodcasts.filter(p => !p.isListened);
+    }
+    const completed = collectionPodcasts.filter(p => p.isListened);
+    const inProgress = collectionPodcasts.filter(p => !p.isListened);
+    return [...inProgress, ...completed];
+
+  }, [currentView, allPodcastsSorted, hideCompleted]);
+
+  const firstUnplayedInView = useMemo(() => {
+    if (!currentView) return null;
+    return podcastsInCurrentView.find(p => !p.isListened);
+  }, [podcastsInCurrentView, currentView]);
+
+  const currentViewStats = useMemo(() => {
+    if (!currentView) return { listenedCount: 0, totalCount: 0, percentage: 0 };
+    const listenedCount = podcastsInCurrentView.filter(p => p.isListened).length;
+    const totalCount = podcastsInCurrentView.length;
+    const percentage = totalCount > 0 ? (listenedCount / totalCount) * 100 : 0;
+    return { listenedCount, totalCount, percentage };
+  }, [podcastsInCurrentView]);
+
   return (
     <div className="text-brand-text min-h-screen">
       <audio ref={soundAudioRef} preload="auto" />
@@ -525,53 +626,84 @@ export default function App() {
       <div className={`transition-all duration-300 ${isPlayerExpanded || !showApp ? 'opacity-0 invisible' : 'opacity-100 visible'} ${!hasCompletedOnboarding ? 'blur-sm' : ''}`}>
         <header className="p-4 sm:p-6 md:p-8">
           <div className="max-w-4xl mx-auto">
-            <div
-              className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
-              style={{ animationDelay: '100ms' }}
-            >
-              <div className="flex-1 min-w-0">
-                {isEditingTitle ? (
-                  <input
-                    ref={titleInputRef}
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    onBlur={() => setIsEditingTitle(false)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === 'Escape') {
-                        setIsEditingTitle(false);
-                        (e.target as HTMLInputElement).blur();
-                      }
-                    }}
-                    className="text-2xl sm:text-3xl font-bold bg-transparent text-brand-text focus:outline-none w-full border-b-2 border-brand-surface-light focus:border-brand-primary transition-colors"
-                    aria-label="Edit course title"
-                  />
-                ) : (
-                  <div className="flex items-center gap-2 group">
-                    <h1 className="text-2xl sm:text-3xl font-bold truncate">{title}</h1>
-                    <button
-                      onClick={() => setIsEditingTitle(true)}
-                      className="text-brand-text-secondary hover:text-brand-text p-1 rounded-full transition-opacity duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100"
-                      aria-label="Edit title"
-                    >
-                      <EditIcon size={20} />
-                    </button>
-                  </div>
-                )}
-              </div>
+            {currentView === null ? (
+              // Root View Header
+              <div
+                className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                style={{ animationDelay: '100ms' }}
+              >
+                <div className="flex-1 min-w-0">
+                  {isEditingTitle ? (
+                    <input
+                      ref={titleInputRef}
+                      type="text"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      onBlur={() => setIsEditingTitle(false)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === 'Escape') {
+                          setIsEditingTitle(false);
+                          (e.target as HTMLInputElement).blur();
+                        }
+                      }}
+                      className="text-2xl sm:text-3xl font-bold bg-transparent text-brand-text focus:outline-none w-full border-b-2 border-brand-surface-light focus:border-brand-primary transition-colors"
+                      aria-label="Edit course title"
+                    />
+                  ) : (
+                    <div className="flex items-center gap-2 group">
+                      <h1 className="text-2xl sm:text-3xl font-bold truncate">{title}</h1>
+                      <button
+                        onClick={() => setIsEditingTitle(true)}
+                        className="text-brand-text-secondary hover:text-brand-text p-1 rounded-full transition-opacity duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100"
+                        aria-label="Edit title"
+                      >
+                        <EditIcon size={20} />
+                      </button>
+                    </div>
+                  )}
+                </div>
 
-              <div className="flex items-center gap-2 sm:gap-4 self-end sm:self-auto">
-                <FileUpload onFileUpload={handleFileUpload} isLoading={isLoading} />
-                 <button
-                    onClick={() => setIsSettingsOpen(true)}
-                    className="p-2 text-brand-text-secondary hover:text-brand-text rounded-full transition-colors duration-200 group"
-                    aria-label="Open settings"
-                  >
-                    <SettingsIcon size={24} />
-                  </button>
+                <div className="flex items-center gap-2 sm:gap-4 self-end sm:self-auto">
+                   <button
+                      onClick={() => {
+                        const name = prompt("Enter new collection name:");
+                        if (name && name.trim()) handleCreateCollection(name);
+                      }}
+                      className="flex items-center justify-center bg-brand-surface text-brand-text rounded-full hover:bg-brand-surface-light transition-all duration-300 p-2 sm:py-2 sm:px-4 b-border b-shadow b-shadow-hover transform hover:scale-105 active:scale-95"
+                      aria-label="Create new collection"
+                    >
+                      <FolderIcon size={20} />
+                      <span className="hidden sm:inline ml-2 font-bold">New Collection</span>
+                    </button>
+                  <FileUpload onFileUpload={handleFileUpload} isLoading={isLoading} />
+                   <button
+                      onClick={() => setIsSettingsOpen(true)}
+                      className="p-2 text-brand-text-secondary hover:text-brand-text rounded-full transition-colors duration-200 group"
+                      aria-label="Open settings"
+                    >
+                      <SettingsIcon size={24} />
+                    </button>
+                </div>
               </div>
-            </div>
-            {podcasts.length > 0 && (
+            ) : (
+              // Collection View Header
+              <div 
+                className={`flex items-center gap-2 ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                style={{ animationDelay: '100ms' }}
+              >
+                <button 
+                    onClick={() => setCurrentView(null)}
+                    className="p-2 text-brand-text-secondary hover:text-brand-text rounded-full transition-colors duration-200"
+                    aria-label="Go back to collections"
+                >
+                    <ChevronLeftIcon size={28} />
+                </button>
+                <h1 className="flex-grow text-2xl sm:text-3xl font-bold truncate">{currentCollection?.name || 'Collection'}</h1>
+                <FileUpload onFileUpload={(files) => handleFileUpload(files, currentView)} isLoading={isLoading} compact />
+              </div>
+            )}
+            
+            {podcasts.length > 0 && currentView === null && (
               <div
                 className={`${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
                 style={{ animationDelay: '200ms' }}
@@ -588,7 +720,7 @@ export default function App() {
 
         <main className="p-4 sm:p-6 md:p-8 pt-0">
           <div className="max-w-4xl mx-auto">
-            {showStreakTracker && (
+            {showStreakTracker && currentView === null && (
               <div
                 className={`mb-6 ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
                 style={{ animationDelay: '300ms' }}
@@ -596,22 +728,66 @@ export default function App() {
                 <StreakTracker streakData={streakData} isTodayComplete={isTodayComplete} />
               </div>
             )}
-            {podcasts.length > 0 ? (
-              <div
-                className={`${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
-                style={{ animationDelay: showStreakTracker ? '400ms' : '300ms' }}
-              >
-                <PodcastList 
-                  podcasts={visiblePodcasts}
-                  currentPodcastId={currentPodcastId}
-                  isPlaying={isPlaying}
-                  onSelectPodcast={handleSelectPodcast}
-                  onDeletePodcast={handleDeletePodcast}
-                  onTogglePodcastComplete={handleToggleComplete}
-                  hideCompleted={hideCompleted}
-                  activePlayerTime={activePlayerTime}
-                />
-              </div>
+            {podcasts.length > 0 || collections.length > 0 ? (
+                currentView === null ? (
+                    <div
+                      className={`${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                      style={{ animationDelay: showStreakTracker ? '400ms' : '300ms' }}
+                    >
+                      <CollectionList 
+                        collections={collections}
+                        podcasts={podcasts}
+                        onNavigateToCollection={setCurrentView}
+                        onPlayCollection={handlePlayCollection}
+                        onRenameCollection={handleRenameCollection}
+                        onDeleteCollection={handleDeleteCollection}
+                      />
+                    </div>
+                ) : (
+                    <>
+                      {firstUnplayedInView && (
+                        <div
+                          className={`mb-6 ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                          style={{ animationDelay: '100ms' }}
+                        >
+                          <button
+                            onClick={() => handlePlayCollection(currentView === 'uncategorized' ? null : currentView)}
+                            className="w-full flex items-center justify-center gap-3 text-lg font-bold bg-brand-primary text-brand-text-on-primary rounded-lg p-4 b-border b-shadow b-shadow-hover transition-transform transform hover:scale-[1.02] active:scale-[0.98]"
+                            aria-label="Continue learning this collection"
+                          >
+                            <PlayIcon size={24} />
+                            <span>Continue Learning</span>
+                          </button>
+                        </div>
+                      )}
+                     <div 
+                        className={`bg-brand-surface rounded-lg overflow-hidden shadow-lg b-border b-shadow ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                        style={{ animationDelay: firstUnplayedInView ? '200ms' : '100ms' }}
+                    >
+                        {podcastsInCurrentView.length > 0 && (
+                          <div className="p-4 border-b border-brand-surface">
+                              <StatusBar 
+                                  listenedCount={currentViewStats.listenedCount}
+                                  totalCount={currentViewStats.totalCount}
+                                  percentage={currentViewStats.percentage}
+                              />
+                          </div>
+                        )}
+                        <PodcastList
+                            podcasts={podcastsInCurrentView}
+                            collections={collections}
+                            currentPodcastId={currentPodcastId}
+                            isPlaying={isPlaying}
+                            onSelectPodcast={handleSelectPodcast}
+                            onDeletePodcast={handleDeletePodcast}
+                            onTogglePodcastComplete={handleToggleComplete}
+                            onMovePodcastToCollection={handleMovePodcastToCollection}
+                            hideCompleted={hideCompleted}
+                            activePlayerTime={activePlayerTime}
+                        />
+                    </div>
+                  </>
+                )
             ) : (
               <div
                 className={`text-center py-20 bg-brand-surface rounded-lg b-border ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
@@ -670,6 +846,18 @@ export default function App() {
         onConfirm={handleConfirmReview}
         onCancel={handleCancelReview}
         podcastName={reviewPrompt.podcastToReview?.name || ''}
+      />
+
+      <CategorizeModal
+        isOpen={isCategorizeModalOpen}
+        onClose={() => handleAssignToCollection(podcastsToCategorize, null)}
+        collections={collections}
+        podcastCount={podcastsToCategorize.length}
+        onCreateAndAssign={(name) => {
+          const newId = handleCreateCollection(name);
+          handleAssignToCollection(podcastsToCategorize, newId);
+        }}
+        onAssign={(collectionId) => handleAssignToCollection(podcastsToCategorize, collectionId)}
       />
     </div>
   );

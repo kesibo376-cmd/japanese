@@ -1,7 +1,8 @@
 
 
+
 import React, { useRef, useEffect, useState } from 'react';
-import type { Podcast } from '../types';
+import type { Podcast, Collection } from '../types';
 import PodcastItem from './PodcastItem';
 
 interface PodcastListProps {
@@ -11,35 +12,17 @@ interface PodcastListProps {
   onSelectPodcast: (id: string) => void;
   onDeletePodcast: (id: string) => void;
   onTogglePodcastComplete: (id: string) => void;
+  onMovePodcastToCollection: (podcastId: string, collectionId: string | null) => void;
   hideCompleted: boolean;
   activePlayerTime: number;
+  collections: Collection[];
 }
 
-const PodcastList: React.FC<PodcastListProps> = ({ podcasts, currentPodcastId, isPlaying, onSelectPodcast, onDeletePodcast, onTogglePodcastComplete, hideCompleted, activePlayerTime }) => {
+const PodcastList: React.FC<PodcastListProps> = (props) => {
+  const { podcasts, currentPodcastId, isPlaying, onSelectPodcast, onDeletePodcast, onTogglePodcastComplete, onMovePodcastToCollection, hideCompleted, activePlayerTime, collections } = props;
   const listRef = useRef<HTMLDivElement>(null);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    const listElement = listRef.current;
-    if (!listElement) return;
-
-    if (hideCompleted) {
-      listElement.scrollTop = 0;
-      return;
-    }
-
-    const firstUnplayedIndex = podcasts.findIndex(p => !p.isListened);
-    
-    if (firstUnplayedIndex !== -1) {
-      const firstUnplayedNode = listElement.children[firstUnplayedIndex] as HTMLElement;
-      if (firstUnplayedNode) {
-        listElement.scrollTop = firstUnplayedNode.offsetTop;
-      }
-    } else {
-      listElement.scrollTop = 0;
-    }
-  }, [podcasts, hideCompleted]);
-  
   // Clean up deletingIds state if a podcast is removed by other means
   useEffect(() => {
     const podcastIds = new Set(podcasts.map(p => p.id));
@@ -64,8 +47,7 @@ const PodcastList: React.FC<PodcastListProps> = ({ podcasts, currentPodcastId, i
   return (
     <div 
       ref={listRef}
-      className="relative bg-brand-surface rounded-lg overflow-hidden shadow-lg b-border b-shadow max-h-[60vh] overflow-y-auto"
-      style={{ scrollBehavior: 'smooth' }}
+      className="relative"
     >
       {podcasts.map((podcast, index) => (
         <PodcastItem
@@ -76,6 +58,8 @@ const PodcastList: React.FC<PodcastListProps> = ({ podcasts, currentPodcastId, i
           onSelect={onSelectPodcast}
           onDeleteRequest={handleDeleteRequest}
           onToggleComplete={onTogglePodcastComplete}
+          onMoveRequest={onMovePodcastToCollection}
+          collections={collections}
           isDeleting={deletingIds.has(podcast.id)}
           onAnimationEnd={() => handleAnimationEnd(podcast.id)}
           style={{ animationDelay: `${index * 30}ms` }}

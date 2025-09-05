@@ -6,6 +6,12 @@ export interface Podcast {
   progress: number; // in seconds
   isListened: boolean;
   storage: 'preloaded' | 'indexeddb';
+  collectionId: string | null;
+}
+
+export interface Collection {
+  id: string;
+  name: string;
 }
 
 export type Theme = 'charcoal' | 'minecraft' | 'brutalist' | 'retro-web' | 'minimal' | 'hand-drawn';
