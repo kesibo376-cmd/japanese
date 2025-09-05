@@ -44,6 +44,14 @@ export default function App() {
   const [nextPodcastOnEnd, setNextPodcastOnEnd] = useState<string | null>(null);
   const [customArtwork, setCustomArtwork] = useLocalStorage<string | null>('customArtwork', null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [playbackRate, setPlaybackRate] = useLocalStorage<number>('playbackRate', 1);
+
+  // Effect for revealing animation on page load
+  useEffect(() => {
+    const timer = setTimeout(() => setIsInitializing(false), 10);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Effect to load pre-defined podcasts from the public folder on initial app load
   useEffect(() => {
@@ -475,7 +483,10 @@ export default function App() {
       <div className={`transition-opacity duration-300 ${isPlayerExpanded ? 'opacity-0 invisible' : 'opacity-100 visible'}`}>
         <header className="p-4 sm:p-6 md:p-8">
           <div className="max-w-4xl mx-auto">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <div
+              className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 ${isInitializing ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+              style={{ animationDelay: '100ms' }}
+            >
               <div className="flex-1 min-w-0">
                 {isEditingTitle ? (
                   <input
@@ -519,11 +530,16 @@ export default function App() {
               </div>
             </div>
             {podcasts.length > 0 && (
-              <StatusBar 
-                listenedCount={listenedStats.listenedCount}
-                totalCount={listenedStats.totalCount}
-                percentage={listenedStats.percentage}
-              />
+              <div
+                className={`${isInitializing ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                style={{ animationDelay: '200ms' }}
+              >
+                <StatusBar 
+                  listenedCount={listenedStats.listenedCount}
+                  totalCount={listenedStats.totalCount}
+                  percentage={listenedStats.percentage}
+                />
+              </div>
             )}
           </div>
         </header>
@@ -531,22 +547,33 @@ export default function App() {
         <main className="p-4 sm:p-6 md:p-8 pt-0">
           <div className="max-w-4xl mx-auto">
             {streakData.enabled && podcasts.length > 0 && (
-              <div className="mb-6">
+              <div
+                className={`mb-6 ${isInitializing ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                style={{ animationDelay: '300ms' }}
+              >
                 <StreakTracker streakData={streakData} isTodayComplete={isTodayComplete} />
               </div>
             )}
             {podcasts.length > 0 ? (
-              <PodcastList 
-                podcasts={visiblePodcasts}
-                currentPodcastId={currentPodcastId}
-                isPlaying={isPlaying}
-                onSelectPodcast={handleSelectPodcast}
-                onDeletePodcast={handleDeletePodcast}
-                onTogglePodcastComplete={handleToggleComplete}
-                hideCompleted={hideCompleted}
-              />
+              <div
+                className={`${isInitializing ? 'opacity-0' : 'animate-fade-in'}`}
+                style={{ animationDelay: '350ms' }}
+              >
+                <PodcastList 
+                  podcasts={visiblePodcasts}
+                  currentPodcastId={currentPodcastId}
+                  isPlaying={isPlaying}
+                  onSelectPodcast={handleSelectPodcast}
+                  onDeletePodcast={handleDeletePodcast}
+                  onTogglePodcastComplete={handleToggleComplete}
+                  hideCompleted={hideCompleted}
+                />
+              </div>
             ) : (
-              <div className="text-center py-20 bg-brand-surface rounded-lg b-border">
+              <div
+                className={`text-center py-20 bg-brand-surface rounded-lg b-border ${isInitializing ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                style={{ animationDelay: '300ms' }}
+              >
                 <h2 className="text-xl font-semibold">No Podcasts Yet</h2>
                 <p className="text-brand-text-secondary mt-2">Click "Add Podcast" to get started.</p>
               </div>
@@ -567,6 +594,8 @@ export default function App() {
           isPlayerExpanded={isPlayerExpanded}
           setIsPlayerExpanded={setIsPlayerExpanded}
           artworkUrl={customArtwork}
+          playbackRate={playbackRate}
+          onPlaybackRateChange={setPlaybackRate}
         />
       )}
 

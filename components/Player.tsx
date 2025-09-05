@@ -17,7 +17,11 @@ interface PlayerProps {
   isPlayerExpanded: boolean;
   setIsPlayerExpanded: (isExpanded: boolean) => void;
   artworkUrl?: string | null;
+  playbackRate: number;
+  onPlaybackRateChange: (rate: number) => void;
 }
+
+const PLAYBACK_RATES = [0.75, 1, 1.25, 1.5, 2];
 
 const Player: React.FC<PlayerProps> = ({ 
   podcast, 
@@ -28,7 +32,9 @@ const Player: React.FC<PlayerProps> = ({
   onEnded,
   isPlayerExpanded,
   setIsPlayerExpanded,
-  artworkUrl
+  artworkUrl,
+  playbackRate,
+  onPlaybackRateChange,
 }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [currentTime, setCurrentTime] = useState(podcast.progress);
@@ -78,6 +84,13 @@ const Player: React.FC<PlayerProps> = ({
         audioRef.current.currentTime = podcast.progress;
     }
   }, [audioSrc, podcast.progress]);
+
+  // Effect to sync playback rate
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = playbackRate;
+    }
+  }, [playbackRate]);
 
   // Effect to control play/pause state
   useEffect(() => {
@@ -168,6 +181,12 @@ const Player: React.FC<PlayerProps> = ({
     setCurrentTime(newTime);
   }, [podcast.duration]);
 
+  const handleCycleSpeed = () => {
+    const currentIndex = PLAYBACK_RATES.indexOf(playbackRate);
+    const nextIndex = (currentIndex + 1) % PLAYBACK_RATES.length;
+    onPlaybackRateChange(PLAYBACK_RATES[nextIndex]);
+  };
+
   const progressPercent = podcast.duration > 0 ? (currentTime / podcast.duration) * 100 : 0;
 
   const sharedProgressBar = (
@@ -189,7 +208,15 @@ const Player: React.FC<PlayerProps> = ({
   );
 
   const sharedControls = (size: 'small' | 'large') => (
-    <div className={`flex items-center justify-center gap-${size === 'large' ? '4 sm:gap-8' : '2'}`}>
+    <div className={`flex items-center justify-center ${size === 'large' ? 'gap-2 w-full max-w-sm' : 'gap-2'}`}>
+      {size === 'large' && (
+          <button
+              onClick={handleCycleSpeed}
+              className="text-brand-text font-semibold p-2 rounded-md w-16 text-center bg-brand-surface hover:bg-brand-surface-light transition-colors b-border transform hover:scale-105 active:scale-95"
+          >
+              {playbackRate}x
+          </button>
+      )}
       <button onClick={() => handleSkip(-5)} className="text-brand-text-secondary hover:text-brand-text p-2 rounded-full text-sm transform transition-transform hover:scale-110 active:scale-95">
           -5s
       </button>
@@ -202,6 +229,9 @@ const Player: React.FC<PlayerProps> = ({
       <button onClick={() => handleSkip(5)} className="text-brand-text-secondary hover:text-brand-text p-2 rounded-full text-sm transform transition-transform hover:scale-110 active:scale-95">
           +5s
       </button>
+      {size === 'large' && (
+          <div className="w-16" aria-hidden="true"></div> /* Placeholder for visual balance */
+      )}
     </div>
   );
   
@@ -215,6 +245,7 @@ const Player: React.FC<PlayerProps> = ({
         onLoadedData={() => {
             if (audioRef.current) {
                 audioRef.current.currentTime = podcast.progress;
+                audioRef.current.playbackRate = playbackRate;
                 setCurrentTime(podcast.progress);
                 if (podcast.duration === 0 && audioRef.current.duration) {
                   onDurationUpdate(podcast.id, audioRef.current.duration);
