@@ -7,19 +7,28 @@ interface StreakTrackerProps {
   isTodayComplete: boolean;
 }
 
-const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
 const StreakTracker: React.FC<StreakTrackerProps> = ({ streakData, isTodayComplete }) => {
   const { currentStreak, history } = streakData;
 
   const today = new Date();
-  
-  const last7Days = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date();
-    d.setDate(today.getDate() - (6 - i));
+  const todayDateString = today.toISOString().split('T')[0];
+  const dayOfWeek = today.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+
+  // Adjust so Monday is 0 and Sunday is 6
+  const dayOfWeekAdjusted = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - dayOfWeekAdjusted);
+  monday.setHours(0, 0, 0, 0); // Normalize to start of the day
+
+  const daysOfThisWeek = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
     return {
       date: d.toISOString().split('T')[0],
-      dayLabel: DAY_LABELS[d.getDay()],
+      dayLabel: DAY_LABELS[i],
     };
   });
 
@@ -40,11 +49,12 @@ const StreakTracker: React.FC<StreakTrackerProps> = ({ streakData, isTodayComple
       
       {/* 7-Day Chart */}
       <div className="flex items-center justify-between gap-1 w-full sm:w-auto sm:justify-end sm:gap-3">
-        {last7Days.map(({ date, dayLabel }, index) => {
+        {daysOfThisWeek.map(({ date, dayLabel }, index) => {
           const isActive = historySet.has(date);
+          const isToday = date === todayDateString;
           return (
             <div key={index} className="flex flex-col items-center gap-2 p-1 rounded-md text-center">
-               <span className="text-xs sm:text-sm text-brand-text-secondary">{dayLabel}</span>
+               <span className={`text-xs sm:text-sm ${isToday ? 'text-brand-text font-bold' : 'text-brand-text-secondary'}`}>{dayLabel}</span>
               <div
                 className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full transition-colors duration-200 b-border ${isActive ? 'bg-brand-primary' : 'bg-brand-surface-light'}`}
                 title={`Activity on ${date}`}

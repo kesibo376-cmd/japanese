@@ -575,7 +575,7 @@ export default function App() {
                 style={{ animationDelay: '300ms' }}
               >
                 <h2 className="text-xl font-semibold">No Podcasts Yet</h2>
-                <p className="text-brand-text-secondary mt-2">Click "Add Podcast" to get started.</p>
+                <p className="text-brand-text-secondary mt-2">Click "Add Audio" to get started.</p>
               </div>
             )}
           </div>
