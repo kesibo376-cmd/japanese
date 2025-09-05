@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { Podcast, Collection } from '../types';
-import { formatTime } from '../lib/utils';
+import { formatTime, formatBytes } from '../lib/utils';
 import PlayIcon from './icons/PlayIcon';
 import PauseIcon from './icons/PauseIcon';
 import CheckIcon from './icons/CheckIcon';
@@ -105,8 +105,11 @@ const PodcastItem: React.FC<PodcastItemProps> = ({
           ></div>
         </div>
       </div>
-      <div className="flex-shrink-0 text-sm text-brand-text-secondary w-12 text-right">
-        {formatTime(podcast.duration)}
+      <div className="flex-shrink-0 text-sm text-brand-text-secondary w-20 text-right">
+        <span>{formatTime(podcast.duration)}</span>
+        {typeof podcast.size === 'number' && podcast.storage === 'indexeddb' && (
+           <span className="block text-xs opacity-80">{formatBytes(podcast.size)}</span>
+        )}
       </div>
        <div className="flex-shrink-0 relative" ref={menuRef}>
           <button onClick={handleMenuToggle} className="p-2 rounded-full hover:bg-brand-surface-light text-brand-text-secondary hover:text-brand-text">

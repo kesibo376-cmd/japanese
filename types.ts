@@ -7,11 +7,12 @@ export interface Podcast {
   isListened: boolean;
   storage: 'preloaded' | 'indexeddb';
   collectionId: string | null;
+  size?: number; // file size in bytes
 }
 
 export interface Collection {
   id: string;
-  name: string;
+  name:string;
 }
 
 export type Theme = 'charcoal' | 'minecraft' | 'brutalist' | 'retro-web' | 'minimal' | 'hand-drawn';

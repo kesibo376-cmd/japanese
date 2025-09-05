@@ -1,9 +1,11 @@
 import React, { useRef } from 'react';
 import type { Theme, StreakData, StreakDifficulty, CompletionSound, Collection } from '../types';
+import { formatBytes } from '../lib/utils';
 import ToggleSwitch from './ToggleSwitch';
 import ImageIcon from './icons/ImageIcon';
 import DownloadIcon from './icons/DownloadIcon';
 import UploadIcon from './icons/UploadIcon';
+import DatabaseIcon from './icons/DatabaseIcon';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -28,6 +30,7 @@ interface SettingsModalProps {
   onSetUseCollectionsView: (value: boolean) => void;
   playOnNavigate: boolean;
   onSetPlayOnNavigate: (value: boolean) => void;
+  totalStorageUsed: number;
 }
 
 const THEMES: { id: Theme; name: string }[] = [
@@ -76,6 +79,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onSetUseCollectionsView,
   playOnNavigate,
   onSetPlayOnNavigate,
+  totalStorageUsed,
 }) => {
   const artworkInputRef = useRef<HTMLInputElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
@@ -286,6 +290,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* Section: Data Management */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-brand-text border-b border-brand-surface-light pb-2">Data Management</h3>
+             <div className="p-3 bg-brand-surface-light rounded-md b-border flex items-center gap-3">
+                <DatabaseIcon size={24} className="text-brand-text-secondary flex-shrink-0"/>
+                <div>
+                  <p className="font-semibold">Audio Storage</p>
+                  <p className="text-sm text-brand-text-secondary">
+                    Total space used by saved audio: <span className="font-bold text-brand-text">{formatBytes(totalStorageUsed)}</span>
+                  </p>
+                </div>
+            </div>
             <button 
                 onClick={onExportData}
                 className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200 b-border flex items-center gap-3"
