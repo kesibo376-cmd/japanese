@@ -2,9 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3e%3crect width='64' height='64' fill='black'/%3e%3cg fill='white'%3e%3crect x='18' y='26' width='8' height='12' rx='2'/%3e%3crect x='28' y='18' width='8' height='28' rx='2'/%3e%3crect x='38' y='22' width='8' height='20' rx='2'/%3e%3c/g%3e%3c/svg%3e" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3e%3crect width='64' height='64' fill='black'/%3e%3cg fill='white'%3e%3crect x='18' y='26' width='8' height='12' rx='2'/%3e%3crect x='28' y='18' width='8' height='28' rx='2'/%3e%3crect x='38' y='22' width='8' height='20' rx='2'/%3e%3c/g%3e%3c/svg%3e" />
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3e%3crect width='64' height='64' fill='black'/%3e%3cg fill='white'%3e%3crect x='18' y='26' width='8' height='12' rx='2'/%3e%3crect x='28' y='18' width='8' height='28' rx='2'/%3e%3crect x='38' y='22' width='8' height='20' rx='2'/%3e%3c/g%3e%3c/svg%3e" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Audio Player</title>
+    <title>Local Audio Player</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&family=Source+Sans+Pro:wght@400;600;700&family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -119,6 +120,24 @@
         box-shadow: none;
       }
 
+      /* Icon Theme Overrides */
+      [data-theme="brutalist"] .redo-icon {
+        stroke-width: 3;
+      }
+
+      [data-theme="retro-web"] .redo-icon path {
+        display: none;
+      }
+
+      [data-theme="retro-web"] .redo-icon {
+        background-color: currentColor;
+        -webkit-mask-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAGFJREFUOE9jZKAQMOLz/38GBgYHBgYGEDsDsSkQ/4H4ExB/A/EzEP8C4k+g/g/Ez0D8B4gfA/FDIAYk3gbiN0D8D4j/AfE/QPwPiAOB+AEQXwfiFyB+B8QXIH4ExItA/BSIFwMHAL2sO4fPjAhPAAAAAElFTkSuQmCC');
+        mask-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAGFJREFUOE9jZKAQMOLz/38GBgYHBgYGEDsDsSkQ/4H4ExB/A/EzEP8C4k+g/g/Ez0D8B4gfA/FDIAYk3gbiN0D8D4j/AfE/QPwPiAOB+AEQXwfiFyB+B8QXIH4ExItA/BSIFwMHAL2sO4fPjAhPAAAAAElFTkSuQmCC');
+        mask-size: contain;
+        mask-repeat: no-repeat;
+        mask-position: center;
+      }
+
 
       /* Animations */
       @keyframes fadeIn {
@@ -202,7 +221,7 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/japanese/assets/index-BQ6d9jX9.js"></script>
+  <script type="module" crossorigin src="/japanese/assets/index-CUSSGN9c.js"></script>
 </head>
   <body class="bg-brand-bg font-sans">
     <div id="root"></div>
