@@ -70,6 +70,79 @@
         background-repeat: repeat;
       }
 
+      [data-theme="glass"] {
+        --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        --brand-bg: transparent;
+        --brand-surface: rgba(255, 255, 255, 0.5);
+        --brand-surface-light: rgba(255, 255, 255, 0.7);
+        --brand-primary: #0A84FF;
+        --brand-primary-hover: #3399FF;
+        --brand-text: #1d1d1f;
+        --brand-text-secondary: rgba(60, 60, 67, 0.75);
+        --brand-text-on-primary: #FFFFFF;
+        --brand-border-color: rgba(0, 0, 0, 0.1);
+        --brand-gradient-start: rgba(10, 132, 255, 0.15);
+        --brand-gradient-end: transparent;
+      }
+      html[data-theme="glass"] {
+        height: 100%;
+        color-scheme: light;
+      }
+      body[data-theme="glass"] {
+        position: relative;
+        min-height: 100%;
+        background-color: transparent !important;
+      }
+      body[data-theme="glass"]::before {
+        content: '';
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: -1;
+        background-color: #f9fafb; /* Light base */
+        background-image:
+            radial-gradient(at 27% 37%, hsla(215, 98%, 80%, 0.4) 0px, transparent 50%),
+            radial-gradient(at 97% 21%, hsla(125, 98%, 85%, 0.5) 0px, transparent 50%),
+            radial-gradient(at 52% 99%, hsla(355, 98%, 88%, 0.5) 0px, transparent 50%),
+            radial-gradient(at 10% 29%, hsla(256, 96%, 85%, 0.4) 0px, transparent 50%),
+            radial-gradient(at 97% 96%, hsla(38, 60%, 88%, 0.5) 0px, transparent 50%),
+            radial-gradient(at 33% 50%, hsla(222, 67%, 88%, 0.4) 0px, transparent 50%),
+            radial-gradient(at 79% 53%, hsla(343, 68%, 90%, 0.5) 0px, transparent 50%);
+        background-attachment: fixed;
+        background-position: center;
+        background-size: cover;
+      }
+      [data-theme="glass"] .bg-brand-surface,
+      [data-theme="glass"] .bg-brand-surface-light,
+      [data-theme="glass"] .bg-brand-surface-light.hover\\:bg-opacity-75:hover {
+        background-color: var(--brand-surface) !important;
+        -webkit-backdrop-filter: blur(25px);
+        backdrop-filter: blur(25px);
+      }
+      [data-theme="glass"] .hover\\:bg-brand-surface:hover,
+      [data-theme="glass"] .bg-brand-surface-light {
+        background-color: var(--brand-surface-light) !important;
+      }
+      [data-theme="glass"] .b-border { border: 1px solid var(--brand-border-color); }
+      [data-theme="glass"] .border-brand-surface { border-color: var(--brand-border-color); }
+      /* More subtle shadows for light theme */
+      [data-theme="glass"] .b-shadow { box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08); }
+      [data-theme="glass"] .shadow-lg, [data-theme="glass"] .shadow-2xl { box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.12); }
+      [data-theme="glass"] .b-shadow-hover:hover {
+        box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+      }
+      [data-theme="glass"] button.b-shadow-hover:active {
+        box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
+        transform: translateY(1px);
+      }
+      [data-theme="glass"] .rounded-lg { border-radius: 1rem; }
+      [data-theme="glass"] .rounded-md { border-radius: 0.75rem; }
+      [data-theme="glass"] .animated-player-bg {
+        background: transparent !important;
+        -webkit-backdrop-filter: blur(50px);
+        backdrop-filter: blur(50px);
+      }
+
       /* Brutalist & Retro Overrides */
       [data-theme="brutalist"] .rounded-lg,
       [data-theme="brutalist"] .rounded-md,
@@ -233,7 +306,7 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/japanese/assets/index-9O1CRGFm.js"></script>
+  <script type="module" crossorigin src="/japanese/assets/index-GiI2GMAO.js"></script>
 </head>
   <body class="bg-brand-bg font-sans">
     <div id="root"></div>
