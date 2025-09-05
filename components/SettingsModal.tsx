@@ -26,10 +26,9 @@ interface SettingsModalProps {
 
 const THEMES: { id: Theme; name: string }[] = [
   { id: 'charcoal', name: 'Charcoal' },
-  { id: 'ocean', name: 'Ocean' },
   { id: 'paper', name: 'Paper' },
   { id: 'brutalist', name: 'Brutalist' },
-  { id: 'cyber', name: 'Cyber' },
+  { id: 'retro-web', name: 'Retro Web' },
 ];
 
 const DIFFICULTIES: { id: StreakDifficulty, name: string, description: string }[] = [
@@ -144,7 +143,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   key={theme.id}
                   onClick={() => onSetTheme(theme.id)}
                   className={`w-full text-left p-3 rounded-md transition-colors duration-200 flex items-center justify-between b-border ${
-                    currentTheme === theme.id ? 'bg-brand-primary text-brand-text-on-primary' : 'bg-brand-surface-light hover:bg-opacity-75'
+                    currentTheme === theme.id ? 'bg-brand-primary text-brand-text-on-primary active' : 'bg-brand-surface-light hover:bg-opacity-75'
                   }`}
                 >
                   <span>{theme.name}</span>
@@ -209,7 +208,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                 key={d.id}
                                 onClick={() => handleDifficultyChange(d.id)}
                                 className={`w-full text-left p-2 rounded-md transition-colors duration-200 flex items-center justify-between text-sm b-border ${
-                                    streakData.difficulty === d.id ? 'bg-brand-primary text-brand-text-on-primary' : 'bg-brand-surface hover:bg-opacity-75'
+                                    streakData.difficulty === d.id ? 'bg-brand-primary text-brand-text-on-primary active' : 'bg-brand-surface hover:bg-opacity-75'
                                 }`}
                             >
                                 <div>

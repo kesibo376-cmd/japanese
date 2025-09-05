@@ -14,6 +14,7 @@ import EditIcon from './components/icons/EditIcon';
 import SettingsModal from './components/SettingsModal';
 import StreakTracker from './components/StreakTracker';
 import ReviewModal from './components/ReviewModal';
+import Confetti from './components/Confetti';
 
 const INITIAL_PODCASTS: Podcast[] = [];
 
@@ -42,6 +43,7 @@ export default function App() {
   const [reviewPrompt, setReviewPrompt] = useState<{ show: boolean; podcastToReview: Podcast | null; podcastToPlay: Podcast | null }>({ show: false, podcastToReview: null, podcastToPlay: null });
   const [nextPodcastOnEnd, setNextPodcastOnEnd] = useState<string | null>(null);
   const [customArtwork, setCustomArtwork] = useLocalStorage<string | null>('customArtwork', null);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Effect to load pre-defined podcasts from the public folder on initial app load
   useEffect(() => {
@@ -259,6 +261,11 @@ export default function App() {
   };
 
   const handlePlaybackEnd = () => {
+      if (isPlayerExpanded) {
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 5000); // Confetti lasts 5 seconds
+      }
+    
       if (currentPodcastId) {
         // The check in updatePodcastProgress is more reliable, but we can ensure it's marked here too.
         setPodcasts(prev => 
@@ -464,6 +471,7 @@ export default function App() {
 
   return (
     <div className="text-brand-text min-h-screen">
+      {showConfetti && <Confetti count={50} theme={theme} />}
       <div className={`transition-opacity duration-300 ${isPlayerExpanded ? 'opacity-0 invisible' : 'opacity-100 visible'}`}>
         <header className="p-4 sm:p-6 md:p-8">
           <div className="max-w-4xl mx-auto">
