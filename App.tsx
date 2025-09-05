@@ -13,6 +13,7 @@ import StatusBar from './components/StatusBar';
 import SettingsIcon from './components/icons/SettingsIcon';
 import EditIcon from './components/icons/EditIcon';
 import SettingsModal from './components/SettingsModal';
+import OnboardingModal from './components/OnboardingModal';
 import StreakTracker from './components/StreakTracker';
 import ReviewModal from './components/ReviewModal';
 import Confetti from './components/Confetti';
@@ -56,6 +57,7 @@ export default function App() {
   const [playbackRate, setPlaybackRate] = useLocalStorage<number>('playbackRate', 1);
   const [activePlayerTime, setActivePlayerTime] = useState(0);
   const [completionSound, setCompletionSound] = useLocalStorage<CompletionSound>('completionSound', 'none');
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useLocalStorage<boolean>('hasCompletedOnboarding', false);
 
   // Effect for revealing animation on page load
   useEffect(() => {
@@ -117,7 +119,7 @@ export default function App() {
 
   // Effect to lock body scroll when player is expanded or settings are open
   useEffect(() => {
-    const shouldLockScroll = isPlayerExpanded || isSettingsOpen;
+    const shouldLockScroll = isPlayerExpanded || isSettingsOpen || !hasCompletedOnboarding;
     if (shouldLockScroll) {
       document.body.classList.add('overflow-hidden');
     } else {
@@ -128,7 +130,7 @@ export default function App() {
     return () => {
       document.body.classList.remove('overflow-hidden');
     };
-  }, [isPlayerExpanded, isSettingsOpen]);
+  }, [isPlayerExpanded, isSettingsOpen, hasCompletedOnboarding]);
 
   // Effect to focus the title input when editing starts
   useEffect(() => {
@@ -415,6 +417,7 @@ export default function App() {
       hideCompleted,
       reviewModeEnabled,
       customArtwork,
+      completionSound,
     };
     
     const jsonString = JSON.stringify(dataToExport, null, 2);
@@ -428,9 +431,9 @@ export default function App() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [podcasts, title, theme, streakData, hideCompleted, reviewModeEnabled, customArtwork]);
+  }, [podcasts, title, theme, streakData, hideCompleted, reviewModeEnabled, customArtwork, completionSound]);
 
-  const handleImportData = useCallback((file: File) => {
+  const handleImportData = useCallback((file: File, onSuccess?: () => void) => {
     if (!file) return;
 
     const reader = new FileReader();
@@ -453,6 +456,7 @@ export default function App() {
             if (typeof importedData.hideCompleted === 'boolean') setHideCompleted(importedData.hideCompleted);
             if (typeof importedData.reviewModeEnabled === 'boolean') setReviewModeEnabled(importedData.reviewModeEnabled);
             if (importedData.customArtwork !== undefined) setCustomArtwork(importedData.customArtwork);
+            if (importedData.completionSound) setCompletionSound(importedData.completionSound);
             
             // Merge podcast progress intelligently
             setPodcasts(currentPodcasts => {
@@ -474,7 +478,7 @@ export default function App() {
             });
 
             alert('Progress imported successfully!');
-            setIsSettingsOpen(false);
+            onSuccess?.();
 
         } catch (error) {
             console.error("Failed to import data:", error);
@@ -485,7 +489,7 @@ export default function App() {
         alert('Failed to read the file.');
     };
     reader.readAsText(file);
-  }, [setPodcasts, setTitle, setTheme, setStreakData, setHideCompleted, setReviewModeEnabled, setCustomArtwork]);
+  }, [setPodcasts, setTitle, setTheme, setStreakData, setHideCompleted, setReviewModeEnabled, setCustomArtwork, setCompletionSound]);
 
   const currentPodcast = useMemo(() => 
     podcasts.find(p => p.id === currentPodcastId),
@@ -500,16 +504,39 @@ export default function App() {
   }, [podcasts]);
 
   const showStreakTracker = streakData.enabled && podcasts.length > 0;
+  
+  const handleOnboardingComplete = () => {
+    setHasCompletedOnboarding(true);
+  };
+  
+  const showApp = hasCompletedOnboarding && !isInitializing;
 
   return (
     <div className="text-brand-text min-h-screen">
       <audio ref={soundAudioRef} preload="auto" />
       {showConfetti && <Confetti count={50} theme={theme} />}
-      <div className={`transition-opacity duration-300 ${isPlayerExpanded ? 'opacity-0 invisible' : 'opacity-100 visible'}`}>
+
+      <OnboardingModal
+        isOpen={!hasCompletedOnboarding}
+        onComplete={handleOnboardingComplete}
+        title={title}
+        onSetTitle={setTitle}
+        currentTheme={theme}
+        onSetTheme={setTheme}
+        streakData={streakData}
+        onSetStreakData={setStreakData}
+        customArtwork={customArtwork}
+        onSetCustomArtwork={setCustomArtwork}
+        onImportData={(file) => handleImportData(file, handleOnboardingComplete)}
+        completionSound={completionSound}
+        onSetCompletionSound={setCompletionSound}
+      />
+      
+      <div className={`transition-all duration-300 ${isPlayerExpanded || !showApp ? 'opacity-0 invisible' : 'opacity-100 visible'} ${!hasCompletedOnboarding ? 'blur-sm' : ''}`}>
         <header className="p-4 sm:p-6 md:p-8">
           <div className="max-w-4xl mx-auto">
             <div
-              className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 ${isInitializing ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+              className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
               style={{ animationDelay: '100ms' }}
             >
               <div className="flex-1 min-w-0">
@@ -556,7 +583,7 @@ export default function App() {
             </div>
             {podcasts.length > 0 && (
               <div
-                className={`${isInitializing ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                className={`${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
                 style={{ animationDelay: '200ms' }}
               >
                 <StatusBar 
@@ -573,7 +600,7 @@ export default function App() {
           <div className="max-w-4xl mx-auto">
             {showStreakTracker && (
               <div
-                className={`mb-6 ${isInitializing ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                className={`mb-6 ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
                 style={{ animationDelay: '300ms' }}
               >
                 <StreakTracker streakData={streakData} isTodayComplete={isTodayComplete} />
@@ -581,7 +608,7 @@ export default function App() {
             )}
             {podcasts.length > 0 ? (
               <div
-                className={`${isInitializing ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                className={`${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
                 style={{ animationDelay: showStreakTracker ? '400ms' : '300ms' }}
               >
                 <PodcastList 
@@ -597,7 +624,7 @@ export default function App() {
               </div>
             ) : (
               <div
-                className={`text-center py-20 bg-brand-surface rounded-lg b-border ${isInitializing ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
+                className={`text-center py-20 bg-brand-surface rounded-lg b-border ${!showApp ? 'opacity-0' : 'animate-slide-up-fade-in'}`}
                 style={{ animationDelay: '300ms' }}
               >
                 <h2 className="text-xl font-semibold">No Audio Files Yet</h2>
@@ -643,7 +670,7 @@ export default function App() {
         customArtwork={customArtwork}
         onSetCustomArtwork={setCustomArtwork}
         onExportData={handleExportData}
-        onImportData={handleImportData}
+        onImportData={(file) => handleImportData(file, () => setIsSettingsOpen(false))}
         completionSound={completionSound}
         onSetCompletionSound={setCompletionSound}
       />

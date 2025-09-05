@@ -73,8 +73,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const importInputRef = useRef<HTMLInputElement>(null);
 
   const handleResetClick = () => {
-    onResetProgress();
-    onClose();
+    if (window.confirm('Are you sure you want to reset all audio progress? This action cannot be undone.')) {
+        onResetProgress();
+        onClose();
+    }
   };
 
   const handleDeleteClick = () => {
@@ -131,7 +133,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
   return (
     <div 
-      className={`fixed inset-0 bg-black z-40 p-4 transition-opacity duration-300 ease-in-out ${isOpen ? 'bg-opacity-75' : 'bg-opacity-0 pointer-events-none'}`}
+      className={`fixed inset-0 bg-black z-40 p-4 transition-opacity duration-300 ease-in-out ${isOpen ? 'bg-opacity-75 backdrop-blur-sm' : 'bg-opacity-0 pointer-events-none'}`}
       onClick={onClose}
       role="dialog"
       aria-modal="true"
@@ -148,181 +150,168 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
         
         <div className="space-y-6 max-h-[80vh] overflow-y-auto pr-2 -mr-2">
-          <div>
-            <h3 className="text-lg font-semibold text-brand-text mb-3">Appearance</h3>
-            <div className="space-y-2">
-              {THEMES.map(theme => (
-                <button
-                  key={theme.id}
-                  onClick={() => onSetTheme(theme.id)}
-                  className={`w-full text-left p-3 rounded-md transition-colors duration-200 flex items-center justify-between b-border ${
-                    currentTheme === theme.id ? 'bg-brand-primary text-brand-text-on-primary active' : 'bg-brand-surface-light hover:bg-opacity-75'
-                  }`}
-                >
-                  <span>{theme.name}</span>
-                  {currentTheme === theme.id && <span className="text-sm">Selected</span>}
-                </button>
-              ))}
+          {/* Section: Appearance */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-brand-text border-b border-brand-surface-light pb-2">Appearance</h3>
+            <div>
+                <label className="block text-sm font-medium text-brand-text-secondary mb-2">Theme</label>
+                <div className="grid grid-cols-2 gap-2">
+                    {THEMES.map(theme => (
+                        <button
+                        key={theme.id}
+                        onClick={() => onSetTheme(theme.id)}
+                        className={`w-full text-center p-2 text-sm rounded-md transition-colors duration-200 b-border ${
+                            currentTheme === theme.id ? 'bg-brand-primary text-brand-text-on-primary active' : 'bg-brand-surface-light hover:bg-opacity-75'
+                        }`}
+                        >
+                        {theme.name}
+                        </button>
+                    ))}
+                </div>
             </div>
-          </div>
-          
-          <div>
-            <h3 className="text-lg font-semibold text-brand-text mb-3">Artwork</h3>
-            <input
-              type="file"
-              accept="image/*"
-              ref={artworkInputRef}
-              onChange={handleArtworkUpload}
-              className="hidden"
-              aria-label="Upload custom artwork"
-            />
-            <div className="p-3 bg-brand-surface-light rounded-md b-border flex items-center gap-4">
-              <div className="w-20 h-20 bg-brand-surface rounded-md b-border flex-shrink-0 flex items-center justify-center overflow-hidden">
-                {customArtwork ? (
-                  <img src={customArtwork} alt="Custom artwork" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="flex flex-col items-center text-brand-text-secondary">
-                    <ImageIcon size={24} />
-                    <span className="text-xs text-center mt-1">No Artwork</span>
-                  </div>
-                )}
-              </div>
-              <div className="flex flex-col gap-2 flex-grow">
-                <button onClick={() => artworkInputRef.current?.click()} className="w-full text-sm text-center px-3 py-2 bg-brand-surface hover:bg-opacity-75 rounded-md transition-colors duration-200 b-border">
-                  {customArtwork ? 'Change Image' : 'Upload Image'}
-                </button>
-                {customArtwork && (
-                  <button onClick={() => onSetCustomArtwork(null)} className="w-full text-sm text-center text-red-500 hover:bg-red-500 hover:text-white px-3 py-2 bg-brand-surface rounded-md transition-colors duration-200 b-border">
-                    Remove
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-brand-text mb-3">Features</h3>
-            <div className="space-y-2">
-                <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md b-border">
-                    <div>
-                        <p className="font-semibold">Enable Streak</p>
-                        <p className="text-sm text-brand-text-secondary">Track your daily listening activity.</p>
+            <div>
+                <label className="block text-sm font-medium text-brand-text-secondary mb-2">Player Artwork</label>
+                <input
+                type="file"
+                accept="image/*"
+                ref={artworkInputRef}
+                onChange={handleArtworkUpload}
+                className="hidden"
+                aria-label="Upload custom artwork"
+                />
+                <div className="p-3 bg-brand-surface-light rounded-md b-border flex items-center gap-4">
+                <div className="w-16 h-16 bg-brand-surface rounded-md b-border flex-shrink-0 flex items-center justify-center overflow-hidden">
+                    {customArtwork ? (
+                    <img src={customArtwork} alt="Custom artwork" className="w-full h-full object-cover" />
+                    ) : (
+                    <div className="flex flex-col items-center text-brand-text-secondary">
+                        <ImageIcon size={24} />
+                        <span className="text-xs text-center mt-1">No Artwork</span>
                     </div>
-                    <ToggleSwitch
-                        isOn={streakData.enabled}
-                        handleToggle={handleStreakToggle}
-                    />
+                    )}
                 </div>
-                 <div className="p-3 bg-brand-surface-light rounded-md b-border">
-                    <p className="font-semibold mb-2">Streak Difficulty</p>
-                     <div className="flex flex-col space-y-2">
-                        {DIFFICULTIES.map(d => (
-                             <button
-                                key={d.id}
-                                onClick={() => handleDifficultyChange(d.id)}
-                                className={`w-full text-left p-2 rounded-md transition-colors duration-200 flex items-center justify-between text-sm b-border ${
-                                    streakData.difficulty === d.id ? 'bg-brand-primary text-brand-text-on-primary active' : 'bg-brand-surface hover:bg-opacity-75'
-                                }`}
-                            >
-                                <div>
-                                    <span className="font-semibold">{d.name}</span>
-                                    <span className="text-xs ml-2 opacity-80">{d.description}</span>
-                                </div>
-                                {streakData.difficulty === d.id && <span className="text-xs">Selected</span>}
-                            </button>
-                        ))}
-                    </div>
+                <div className="flex flex-col gap-2 flex-grow">
+                    <button onClick={() => artworkInputRef.current?.click()} className="w-full text-sm text-center px-3 py-2 bg-brand-surface hover:bg-opacity-75 rounded-md transition-colors duration-200 b-border">
+                    {customArtwork ? 'Change' : 'Upload'}
+                    </button>
+                    {customArtwork && (
+                    <button onClick={() => onSetCustomArtwork(null)} className="w-full text-sm text-center text-red-500 hover:bg-red-500 hover:text-white px-3 py-2 bg-brand-surface rounded-md transition-colors duration-200 b-border">
+                        Remove
+                    </button>
+                    )}
                 </div>
-                <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md b-border">
-                    <div>
-                        <p className="font-semibold">Review Mode</p>
-                        <p className="text-sm text-brand-text-secondary">Prompt to review previous lesson.</p>
-                    </div>
-                    <ToggleSwitch
-                        isOn={reviewModeEnabled}
-                        handleToggle={() => onSetReviewModeEnabled(!reviewModeEnabled)}
-                    />
-                </div>
-                <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md b-border">
-                    <div>
-                        <p className="font-semibold">Hide Completed</p>
-                        <p className="text-sm text-brand-text-secondary">Remove listened items from the list.</p>
-                    </div>
-                    <ToggleSwitch
-                        isOn={hideCompleted}
-                        handleToggle={() => onSetHideCompleted(!hideCompleted)}
-                    />
                 </div>
             </div>
           </div>
           
-           <div>
-            <h3 className="text-lg font-semibold text-brand-text mb-3">Completion Sound</h3>
-            <div className="space-y-2">
-              {SOUNDS.map(sound => (
-                <button
-                  key={sound.id}
-                  onClick={() => onSetCompletionSound(sound.id)}
-                  className={`w-full text-left p-3 rounded-md transition-colors duration-200 flex items-center justify-between b-border ${
-                    completionSound === sound.id ? 'bg-brand-primary text-brand-text-on-primary active' : 'bg-brand-surface-light hover:bg-opacity-75'
-                  }`}
+          {/* Section: Features */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-brand-text border-b border-brand-surface-light pb-2">Features</h3>
+            <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md b-border">
+                <div>
+                    <p className="font-semibold">Enable Streak</p>
+                    <p className="text-sm text-brand-text-secondary">Track your daily listening activity.</p>
+                </div>
+                <ToggleSwitch isOn={streakData.enabled} handleToggle={handleStreakToggle} />
+            </div>
+            <div className={`p-3 bg-brand-surface-light rounded-md b-border transition-opacity ${!streakData.enabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                <p className="font-semibold mb-2">Streak Difficulty</p>
+                <div className="flex flex-col space-y-2">
+                    {DIFFICULTIES.map(d => (
+                        <button
+                            key={d.id}
+                            onClick={() => handleDifficultyChange(d.id)}
+                            disabled={!streakData.enabled}
+                            className={`w-full text-left p-2 rounded-md transition-colors duration-200 flex items-center justify-between text-sm b-border ${
+                                streakData.difficulty === d.id ? 'bg-brand-primary text-brand-text-on-primary active' : 'bg-brand-surface hover:bg-opacity-75'
+                            }`}
+                        >
+                            <div>
+                                <span className="font-semibold">{d.name}</span>
+                                <span className="text-xs ml-2 opacity-80">{d.description}</span>
+                            </div>
+                        </button>
+                    ))}
+                </div>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md b-border">
+                <div>
+                    <p className="font-semibold">Review Mode</p>
+                    <p className="text-sm text-brand-text-secondary">Prompt to review previous lesson.</p>
+                </div>
+                <ToggleSwitch isOn={reviewModeEnabled} handleToggle={() => onSetReviewModeEnabled(!reviewModeEnabled)} />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-brand-surface-light rounded-md b-border">
+                <div>
+                    <p className="font-semibold">Hide Completed</p>
+                    <p className="text-sm text-brand-text-secondary">Remove listened items from the list.</p>
+                </div>
+                <ToggleSwitch isOn={hideCompleted} handleToggle={() => onSetHideCompleted(!hideCompleted)} />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-brand-text-secondary mb-2">Completion Sound</label>
+                <select 
+                    value={completionSound} 
+                    onChange={(e) => onSetCompletionSound(e.target.value as CompletionSound)}
+                    className="w-full p-2 bg-brand-surface-light rounded-md b-border text-brand-text"
                 >
-                  <span>{sound.name}</span>
-                  {completionSound === sound.id && <span className="text-sm">Selected</span>}
-                </button>
-              ))}
+                    {SOUNDS.map(sound => (
+                        <option key={sound.id} value={sound.id}>{sound.name}</option>
+                    ))}
+                </select>
             </div>
           </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-brand-text mb-3">Data Management</h3>
-            <div className="space-y-2">
-               <button 
+          
+          {/* Section: Data Management */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-brand-text border-b border-brand-surface-light pb-2">Data Management</h3>
+            <button 
                 onClick={onExportData}
                 className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200 b-border flex items-center gap-3"
-              >
+            >
                 <DownloadIcon size={20} className="text-brand-text-secondary flex-shrink-0"/>
                 <div>
-                  <p className="font-semibold">Export Progress</p>
-                  <p className="text-sm text-brand-text-secondary">Save your progress to a file.</p>
+                  <p className="font-semibold">Export All Data</p>
+                  <p className="text-sm text-brand-text-secondary">Save settings and progress to a file.</p>
                 </div>
-              </button>
-              
-              <input
+            </button>
+            <input
                 type="file"
                 accept=".json"
                 ref={importInputRef}
                 onChange={handleImportFileChange}
                 className="hidden"
                 aria-label="Import progress file"
-              />
-              <button 
+            />
+            <button 
                 onClick={() => importInputRef.current?.click()}
                 className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200 b-border flex items-center gap-3"
-              >
+            >
                 <UploadIcon size={20} className="text-brand-text-secondary flex-shrink-0"/>
                 <div>
-                  <p className="font-semibold">Import Progress</p>
-                  <p className="text-sm text-brand-text-secondary">Load progress from a file.</p>
+                  <p className="font-semibold">Import Data</p>
+                  <p className="text-sm text-brand-text-secondary">Load settings and progress from a file.</p>
                 </div>
-              </button>
-
-              <button 
+            </button>
+          </div>
+          
+          {/* Section: Danger Zone */}
+          <div className="space-y-4 p-4 rounded-lg border-2 border-red-500/50">
+            <h3 className="text-lg font-semibold text-red-500">Danger Zone</h3>
+            <button 
                 onClick={handleResetClick}
-                className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200 b-border"
-              >
-                <p className="font-semibold">Reset Progress</p>
-                <p className="text-sm text-brand-text-secondary">Mark all audio files as unplayed and reset progress.</p>
-              </button>
-              
-              <button 
+                className="w-full text-left p-3 bg-red-500/10 hover:bg-red-500/20 rounded-md transition-colors duration-200 b-border border-red-500/20"
+            >
+                <p className="font-semibold text-red-500">Reset All Progress</p>
+                <p className="text-sm text-red-500/80">Mark all audio files as unplayed.</p>
+            </button>
+            <button 
                 onClick={handleDeleteClick}
-                className="w-full text-left p-3 bg-brand-surface-light hover:bg-opacity-75 rounded-md transition-colors duration-200 text-red-500 b-border"
-              >
-                <p className="font-semibold">Delete All Audio Files</p>
-                <p className="text-sm">Permanently remove all audio files and data.</p>
-              </button>
-            </div>
+                className="w-full text-left p-3 bg-red-500/10 hover:bg-red-500/20 rounded-md transition-colors duration-200 b-border border-red-500/20"
+            >
+                <p className="font-semibold text-red-500">Delete All Audio</p>
+                <p className="text-sm text-red-500/80">Permanently remove all audio files.</p>
+            </button>
           </div>
         </div>
       </div>

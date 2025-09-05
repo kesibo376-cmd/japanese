@@ -3,7 +3,7 @@ import { useLocalStorage } from './useLocalStorage';
 import type { StreakData, StreakDifficulty } from '../types';
 
 const INITIAL_STREAK_DATA: StreakData = {
-  enabled: false,
+  enabled: true,
   lastListenDate: null,
   currentStreak: 0,
   history: [],
