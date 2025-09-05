@@ -8,7 +8,7 @@
     <title>Local Audio Player</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&family=Source+Sans+Pro:wght@400;600;700&family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital@0;1&family=Source+Sans+Pro:wght@400;600;700&family=VT323&family=Press+Start+2P&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
     <style>
       :root, [data-theme="charcoal"] {
         --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -69,79 +69,91 @@
         background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAAXNSR0IArs4c6QAAABNJREFUGFdjZGBg+M+ABTAx/A8A4a8f9L3ONmcAAAAASUVORK5CYII=');
         background-repeat: repeat;
       }
-
-      [data-theme="glass"] {
+      
+      [data-theme="minimal"] {
         --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        --brand-bg: transparent;
-        --brand-surface: rgba(255, 255, 255, 0.5);
-        --brand-surface-light: rgba(255, 255, 255, 0.7);
-        --brand-primary: #0A84FF;
-        --brand-primary-hover: #3399FF;
+        --brand-bg: #f9f9fb;
+        --brand-surface: #ffffff;
+        --brand-surface-light: #f2f2f7;
+        --brand-primary: #007aff;
+        --brand-primary-hover: #0070e6;
         --brand-text: #1d1d1f;
-        --brand-text-secondary: rgba(60, 60, 67, 0.75);
-        --brand-text-on-primary: #FFFFFF;
-        --brand-border-color: rgba(0, 0, 0, 0.1);
-        --brand-gradient-start: rgba(10, 132, 255, 0.15);
-        --brand-gradient-end: transparent;
+        --brand-text-secondary: #6e6e73;
+        --brand-text-on-primary: #ffffff;
+        --brand-border-color: #e5e5ea;
+        --brand-gradient-start: rgba(0, 122, 255, 0.1);
+        --brand-gradient-end: #f9f9fb;
       }
-      html[data-theme="glass"] {
-        height: 100%;
-        color-scheme: light;
+      
+      [data-theme="hand-drawn"] {
+        --font-sans: 'Caveat', cursive;
+        --brand-bg: #fdfaf4;
+        --brand-surface: #ffffff;
+        --brand-surface-light: #f7f2e9;
+        --brand-primary: #0057b8; /* Blue Ink */
+        --brand-primary-hover: #004c9f;
+        --brand-text: #3a3a3a;
+        --brand-text-secondary: #707070;
+        --brand-text-on-primary: #ffffff;
+        --brand-border-color: #3a3a3a;
+        --brand-gradient-start: rgba(0, 87, 184, 0.1);
+        --brand-gradient-end: #fdfaf4;
       }
-      body[data-theme="glass"] {
-        position: relative;
-        min-height: 100%;
-        background-color: transparent !important;
+      
+      /* Specific overrides for the Minimal theme */
+      [data-theme="minimal"] .rounded-lg {
+        border-radius: 16px;
       }
-      body[data-theme="glass"]::before {
-        content: '';
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        z-index: -1;
-        background-color: #f9fafb; /* Light base */
-        background-image:
-            radial-gradient(at 27% 37%, hsla(215, 98%, 80%, 0.4) 0px, transparent 50%),
-            radial-gradient(at 97% 21%, hsla(125, 98%, 85%, 0.5) 0px, transparent 50%),
-            radial-gradient(at 52% 99%, hsla(355, 98%, 88%, 0.5) 0px, transparent 50%),
-            radial-gradient(at 10% 29%, hsla(256, 96%, 85%, 0.4) 0px, transparent 50%),
-            radial-gradient(at 97% 96%, hsla(38, 60%, 88%, 0.5) 0px, transparent 50%),
-            radial-gradient(at 33% 50%, hsla(222, 67%, 88%, 0.4) 0px, transparent 50%),
-            radial-gradient(at 79% 53%, hsla(343, 68%, 90%, 0.5) 0px, transparent 50%);
-        background-attachment: fixed;
-        background-position: center;
-        background-size: cover;
+      [data-theme="minimal"] .rounded-md {
+        border-radius: 12px;
       }
-      [data-theme="glass"] .bg-brand-surface,
-      [data-theme="glass"] .bg-brand-surface-light,
-      [data-theme="glass"] .bg-brand-surface-light.hover\\:bg-opacity-75:hover {
-        background-color: var(--brand-surface) !important;
-        -webkit-backdrop-filter: blur(25px);
-        backdrop-filter: blur(25px);
+      [data-theme="minimal"] .b-border {
+        border: 1px solid var(--brand-border-color);
       }
-      [data-theme="glass"] .hover\\:bg-brand-surface:hover,
-      [data-theme="glass"] .bg-brand-surface-light {
-        background-color: var(--brand-surface-light) !important;
+      [data-theme="minimal"] .b-shadow {
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
       }
-      [data-theme="glass"] .b-border { border: 1px solid var(--brand-border-color); }
-      [data-theme="glass"] .border-brand-surface { border-color: var(--brand-border-color); }
-      /* More subtle shadows for light theme */
-      [data-theme="glass"] .b-shadow { box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08); }
-      [data-theme="glass"] .shadow-lg, [data-theme="glass"] .shadow-2xl { box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.12); }
-      [data-theme="glass"] .b-shadow-hover:hover {
-        box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.1);
+      [data-theme="minimal"] .shadow-lg,
+      [data-theme="minimal"] .shadow-2xl {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      }
+
+      [data-theme="minimal"] .b-shadow-hover:hover {
         transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
       }
-      [data-theme="glass"] button.b-shadow-hover:active {
-        box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.08);
-        transform: translateY(1px);
+      [data-theme="minimal"] button.b-shadow-hover:active {
+        transform: translateY(0px);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
       }
-      [data-theme="glass"] .rounded-lg { border-radius: 1rem; }
-      [data-theme="glass"] .rounded-md { border-radius: 0.75rem; }
-      [data-theme="glass"] .animated-player-bg {
-        background: transparent !important;
-        -webkit-backdrop-filter: blur(50px);
-        backdrop-filter: blur(50px);
+      [data-theme="minimal"] .animated-player-bg {
+        background: var(--brand-surface) !important;
       }
+      
+      /* Specific overrides for Hand-drawn Theme */
+      [data-theme="hand-drawn"] body {
+          font-size: 18px;
+      }
+      [data-theme="hand-drawn"] h1, [data-theme="hand-drawn"] h2, [data-theme="hand-drawn"] h3, [data-theme="hand-drawn"] input, [data-theme="hand-drawn"] button span {
+          font-weight: 700;
+          letter-spacing: 0.5px;
+      }
+       [data-theme="hand-drawn"] .rounded-lg { border-radius: 8px 12px 7px 10px; }
+       [data-theme="hand-drawn"] .rounded-md { border-radius: 5px 8px 6px 7px; }
+       [data-theme="hand-drawn"] .rounded-full { border-radius: 45% 55% 40% 60% / 60% 40% 55% 45%; }
+       [data-theme="hand-drawn"] .b-border { border: 2px solid var(--brand-border-color); }
+       [data-theme="hand-drawn"] .b-shadow { box-shadow: 3px 3px 0px 0px rgba(58,58,58,0.2); }
+       [data-theme="hand-drawn"] .b-shadow-hover:hover {
+          transform: translateY(-2px) rotate(-0.5deg);
+          box-shadow: 5px 5px 0px 0px rgba(58,58,58,0.2);
+        }
+       [data-theme="hand-drawn"] button.b-shadow-hover:active {
+          transform: translateY(1px) rotate(0.2deg);
+          box-shadow: 2px 2px 0px 0px rgba(58,58,58,0.2);
+        }
+       [data-theme="hand-drawn"] .redo-icon {
+          transform: rotate(5deg);
+        }
 
       /* Brutalist & Retro Overrides */
       [data-theme="brutalist"] .rounded-lg,
@@ -306,7 +318,7 @@
   }
 }
 </script>
-  <script type="module" crossorigin src="/japanese/assets/index-GiI2GMAO.js"></script>
+  <script type="module" crossorigin src="/japanese/assets/index-C0azaUja.js"></script>
 </head>
   <body class="bg-brand-bg font-sans">
     <div id="root"></div>
