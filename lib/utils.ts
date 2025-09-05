@@ -17,8 +17,9 @@ export const formatTime = (time: number): string => {
  * @returns A formatted string e.g., "1.23 MB".
  */
 export const formatBytes = (bytes: number, decimals = 2): string => {
-    if (bytes === 0) return '0 Bytes';
-    if (!bytes || bytes < 0) return '';
+    if (!Number.isFinite(bytes) || bytes <= 0) {
+        return '0 Bytes';
+    }
 
     const k = 1024;
     const dm = decimals < 0 ? 0 : decimals;
